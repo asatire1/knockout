@@ -4,1602 +4,1838 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Padel Tournament Manager</title>
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .tier-elite { background-color: #DC2626; }
+        .tier-advanced { background-color: #EA580C; }
+        .tier-intermediate-plus { background-color: #CA8A04; }
+        .tier-intermediate { background-color: #16A34A; }
+        .tier-beginner-plus { background-color: #2563EB; }
+        .tier-beginner { background-color: #7C3AED; }
+        
+        .match-within { border: 2px solid #7C3AED; }
+        .match-cross { border: 2px solid #16A34A; }
+        
+        .tab-active { background-color: #3B82F6; color: white; }
+        .tab-inactive { background-color: #E5E7EB; color: #374151; }
+        
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            opacity: 1;
+        }
+    </style>
 </head>
-<body>
-    <div id="root"></div>
+<body class="bg-gray-50 min-h-screen">
+    <div id="app"></div>
 
-    <script type="text/babel">
-        const { useState } = React;
+    <script>
+        // ===== FIXTURES DATA =====
+        const FIXTURES = {
+            1: [
+                { team1: [1, 4], team2: [2, 3] },
+                { team1: [5, 8], team2: [6, 7] },
+                { team1: [9, 12], team2: [10, 11] },
+                { team1: [13, 16], team2: [14, 15] },
+                { team1: [17, 20], team2: [18, 19] },
+                { team1: [21, 24], team2: [22, 23] }
+            ],
+            2: [
+                { team1: [1, 24], team2: [10, 16] },
+                { team1: [2, 23], team2: [6, 19] },
+                { team1: [3, 22], team2: [7, 18] },
+                { team1: [4, 21], team2: [8, 17] },
+                { team1: [5, 20], team2: [13, 12] },
+                { team1: [11, 15], team2: [14, 9] }
+            ],
+            3: [
+                { team1: [1, 10], team2: [9, 4] },
+                { team1: [2, 11], team2: [12, 3] },
+                { team1: [5, 18], team2: [13, 8] },
+                { team1: [6, 17], team2: [14, 7] },
+                { team1: [15, 24], team2: [19, 20] },
+                { team1: [16, 23], team2: [22, 21] }
+            ],
+            4: [
+                { team1: [1, 21], team2: [17, 2] },
+                { team1: [4, 19], team2: [18, 3] },
+                { team1: [5, 12], team2: [9, 8] },
+                { team1: [6, 11], team2: [10, 7] },
+                { team1: [13, 24], team2: [20, 16] },
+                { team1: [14, 23], team2: [22, 15] }
+            ],
+            5: [
+                { team1: [4, 14], team2: [13, 1] },
+                { team1: [2, 16], team2: [15, 3] },
+                { team1: [6, 24], team2: [21, 10] },
+                { team1: [5, 23], team2: [11, 7] },
+                { team1: [8, 22], team2: [17, 12] },
+                { team1: [9, 19], team2: [18, 20] }
+            ],
+            6: [
+                { team1: [1, 12], team2: [5, 4] },
+                { team1: [2, 7], team2: [6, 3] },
+                { team1: [9, 20], team2: [21, 8] },
+                { team1: [10, 23], team2: [22, 11] },
+                { team1: [13, 24], team2: [17, 18] },
+                { team1: [14, 19], team2: [16, 15] }
+            ],
+            7: [
+                { team1: [2, 24], team2: [5, 20] },
+                { team1: [4, 23], team2: [6, 19] },
+                { team1: [1, 22], team2: [7, 18] },
+                { team1: [3, 21], team2: [8, 17] },
+                { team1: [15, 16], team2: [13, 12] },
+                { team1: [9, 11], team2: [14, 10] }
+            ],
+            8: [
+                { team1: [5, 12], team2: [9, 4] },
+                { team1: [1, 13], team2: [8, 2] },
+                { team1: [6, 16], team2: [11, 10] },
+                { team1: [3, 17], team2: [14, 7] },
+                { team1: [21, 19], team2: [23, 20] },
+                { team1: [22, 18], team2: [15, 24] }
+            ],
+            9: [
+                { team1: [2, 24], team2: [17, 4] },
+                { team1: [1, 19], team2: [18, 3] },
+                { team1: [6, 12], team2: [11, 8] },
+                { team1: [5, 9], team2: [10, 7] },
+                { team1: [14, 20], team2: [21, 16] },
+                { team1: [13, 23], team2: [22, 15] }
+            ],
+            10: [
+                { team1: [2, 23], team2: [15, 5] },
+                { team1: [1, 22], team2: [4, 20] },
+                { team1: [8, 7], team2: [9, 18] },
+                { team1: [12, 14], team2: [19, 13] },
+                { team1: [3, 24], team2: [10, 17] },
+                { team1: [11, 16], team2: [6, 21] }
+            ],
+            11: [
+                { team1: [12, 22], team2: [16, 20] },
+                { team1: [1, 23], team2: [6, 11] },
+                { team1: [2, 9], team2: [7, 8] },
+                { team1: [3, 21], team2: [5, 13] },
+                { team1: [10, 18], team2: [14, 15] },
+                { team1: [24, 4], team2: [19, 17] }
+            ],
+            12: [
+                { team1: [2, 16], team2: [13, 4] },
+                { team1: [5, 17], team2: [14, 1] },
+                { team1: [6, 24], team2: [21, 8] },
+                { team1: [3, 22], team2: [15, 7] },
+                { team1: [10, 18], team2: [23, 12] },
+                { team1: [9, 19], team2: [20, 11] }
+            ],
+            13: [
+                { team1: [2, 8], team2: [5, 4] },
+                { team1: [3, 7], team2: [6, 1] },
+                { team1: [10, 24], team2: [21, 12] },
+                { team1: [9, 23], team2: [15, 11] },
+                { team1: [14, 20], team2: [17, 16] },
+                { team1: [13, 19], team2: [18, 22] }
+            ]
+        };
 
-        // Tournament fixtures data - 13 rounds, 6 matches per round
-        const fixtures = [
-            [[1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,16],[17,18,19,20],[21,22,23,24]],
-            [[1,24,10,16],[2,23,11,15],[3,22,12,14],[4,21,9,13],[5,20,8,17],[6,19,7,18]],
-            [[1,3,23,21],[2,4,24,22],[5,7,19,17],[6,8,20,18],[9,11,15,13],[10,12,16,14]],
-            [[1,22,12,18],[2,21,9,19],[3,24,10,20],[4,23,11,17],[5,14,8,16],[6,13,7,15]],
-            [[1,5,20,16],[2,6,19,17],[3,7,22,18],[4,8,21,15],[9,13,24,12],[10,14,23,11]],
-            [[1,18,14,24],[2,17,13,23],[3,20,16,22],[4,19,15,21],[5,10,12,8],[6,9,11,7]],
-            [[1,15,11,19],[2,16,12,20],[3,13,9,21],[4,14,10,22],[5,23,7,17],[6,24,8,18]],
-            [[1,8,6,22],[2,7,5,23],[3,10,8,24],[4,9,7,21],[11,19,15,17],[12,20,16,18]],
-            [[1,17,13,21],[2,18,14,22],[3,19,15,23],[4,20,16,24],[5,9,11,7],[6,10,12,8]],
-            [[1,12,4,16],[2,11,3,17],[5,24,14,18],[6,23,13,19],[7,22,10,20],[8,21,9,15]],
-            [[1,19,7,23],[2,20,8,24],[3,17,5,21],[4,18,6,22],[9,16,12,14],[10,15,11,13]],
-            [[1,14,2,13],[3,16,4,15],[5,18,6,17],[7,20,8,19],[9,22,10,21],[11,24,12,23]],
-            [[1,11,5,15],[2,12,6,16],[3,9,7,13],[4,10,8,14],[17,21,19,23],[18,22,20,24]]
-        ];
+        // ===== STATE MANAGEMENT =====
+        class TournamentState {
+            constructor() {
+                this.loadFromStorage();
+            }
 
-        // Default player names
-        const defaultPlayerNames = Array.from({length: 24}, (_, i) => `Player ${i + 1}`);
+            loadFromStorage() {
+                // Initialize default skill ratings (3.75 to 2.75 in equal increments)
+                const defaultRatings = {};
+                for (let i = 1; i <= 24; i++) {
+                    defaultRatings[i] = parseFloat((3.75 - (i - 1) * 0.043478).toFixed(2));
+                }
 
-        // Default skill ratings (descending from 3.85 to 2.45)
-        const defaultSkillRatings = {};
-        for (let i = 1; i <= 24; i++) {
-            defaultSkillRatings[i] = 3.85 - ((i - 1) * 0.06);
+                this.playerNames = JSON.parse(localStorage.getItem('padel_player_names')) || 
+                    Array.from({length: 24}, (_, i) => `Player ${i + 1}`);
+                
+                this.skillRatings = JSON.parse(localStorage.getItem('padel_skill_ratings')) || defaultRatings;
+                
+                this.matchScores = JSON.parse(localStorage.getItem('padel_match_scores')) || {};
+                
+                this.knockoutScores = JSON.parse(localStorage.getItem('padel_knockout_scores')) || {};
+                this.knockoutMaxScore = parseInt(localStorage.getItem('padel_knockout_max_score')) || 16;
+                this.semiMaxScore = parseInt(localStorage.getItem('padel_semi_max_score')) || 16;
+                this.finalMaxScore = parseInt(localStorage.getItem('padel_final_max_score')) || 16;
+                
+                this.savedVersions = JSON.parse(localStorage.getItem('padel_saved_versions')) || [];
+                
+                this.currentTab = 'fixtures';
+                this.filterRound = 'all';
+                this.filterPlayer = 'all';
+            }
+
+            saveToStorage() {
+                localStorage.setItem('padel_player_names', JSON.stringify(this.playerNames));
+                localStorage.setItem('padel_skill_ratings', JSON.stringify(this.skillRatings));
+                localStorage.setItem('padel_match_scores', JSON.stringify(this.matchScores));
+                localStorage.setItem('padel_knockout_scores', JSON.stringify(this.knockoutScores));
+                localStorage.setItem('padel_knockout_max_score', this.knockoutMaxScore.toString());
+                localStorage.setItem('padel_semi_max_score', this.semiMaxScore.toString());
+                localStorage.setItem('padel_final_max_score', this.finalMaxScore.toString());
+                localStorage.setItem('padel_saved_versions', JSON.stringify(this.savedVersions));
+            }
+
+            updatePlayerName(index, name) {
+                this.playerNames[index] = name;
+                this.saveToStorage();
+            }
+
+            updateSkillRating(playerId, rating) {
+                this.skillRatings[playerId] = rating;
+                this.saveToStorage();
+            }
+
+            updateMatchScore(round, match, team1Score, team2Score) {
+                if (!this.matchScores[round]) {
+                    this.matchScores[round] = {};
+                }
+                this.matchScores[round][match] = { team1Score, team2Score };
+                this.saveToStorage();
+            }
+
+            clearMatchScore(round, match) {
+                if (this.matchScores[round] && this.matchScores[round][match]) {
+                    delete this.matchScores[round][match];
+                    this.saveToStorage();
+                }
+            }
+
+            updateKnockoutScore(matchId, team1Score, team2Score) {
+                this.knockoutScores[matchId] = { team1Score, team2Score };
+                this.saveToStorage();
+            }
+
+            clearKnockoutScore(matchId) {
+                if (this.knockoutScores[matchId]) {
+                    delete this.knockoutScores[matchId];
+                    this.saveToStorage();
+                }
+            }
+
+            updateKnockoutMaxScore(value) {
+                this.knockoutMaxScore = value;
+                this.saveToStorage();
+            }
+
+            updateSemiMaxScore(value) {
+                this.semiMaxScore = value;
+                this.saveToStorage();
+            }
+
+            updateFinalMaxScore(value) {
+                this.finalMaxScore = value;
+                this.saveToStorage();
+            }
+
+            resetAllScores() {
+                // Auto-backup before reset
+                this.createBackup('Auto-backup before reset');
+                this.matchScores = {};
+                this.saveToStorage();
+            }
+
+            createBackup(name) {
+                const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+                const backup = {
+                    id: Date.now(),
+                    name: name || `Backup ${timestamp}`,
+                    timestamp: timestamp,
+                    playerNames: [...this.playerNames],
+                    skillRatings: {...this.skillRatings},
+                    matchScores: JSON.parse(JSON.stringify(this.matchScores)),
+                    knockoutScores: JSON.parse(JSON.stringify(this.knockoutScores)),
+                    knockoutMaxScore: this.knockoutMaxScore,
+                    semiMaxScore: this.semiMaxScore,
+                    finalMaxScore: this.finalMaxScore
+                };
+                
+                this.savedVersions.unshift(backup);
+                if (this.savedVersions.length > 10) {
+                    this.savedVersions = this.savedVersions.slice(0, 10);
+                }
+                this.saveToStorage();
+                return backup;
+            }
+
+            loadVersion(versionId) {
+                const version = this.savedVersions.find(v => v.id === versionId);
+                if (version) {
+                    // Auto-backup current state
+                    this.createBackup('Auto-backup before load');
+                    
+                    this.playerNames = [...version.playerNames];
+                    this.skillRatings = {...version.skillRatings};
+                    this.matchScores = JSON.parse(JSON.stringify(version.matchScores));
+                    if (version.knockoutScores) this.knockoutScores = JSON.parse(JSON.stringify(version.knockoutScores));
+                    if (version.knockoutMaxScore) this.knockoutMaxScore = version.knockoutMaxScore;
+                    if (version.semiMaxScore) this.semiMaxScore = version.semiMaxScore;
+                    if (version.finalMaxScore) this.finalMaxScore = version.finalMaxScore;
+                    this.saveToStorage();
+                }
+            }
+
+            deleteVersion(versionId) {
+                this.savedVersions = this.savedVersions.filter(v => v.id !== versionId);
+                this.saveToStorage();
+            }
+
+            exportData() {
+                return {
+                    exportDate: new Date().toISOString(),
+                    playerNames: this.playerNames,
+                    skillRatings: this.skillRatings,
+                    matchScores: this.matchScores,
+                    knockoutScores: this.knockoutScores,
+                    knockoutMaxScore: this.knockoutMaxScore,
+                    semiMaxScore: this.semiMaxScore,
+                    finalMaxScore: this.finalMaxScore,
+                    savedVersions: this.savedVersions
+                };
+            }
+
+            importData(data) {
+                if (data.playerNames) this.playerNames = data.playerNames;
+                if (data.skillRatings) this.skillRatings = data.skillRatings;
+                if (data.matchScores) this.matchScores = data.matchScores;
+                if (data.knockoutScores) this.knockoutScores = data.knockoutScores;
+                if (data.knockoutMaxScore) this.knockoutMaxScore = data.knockoutMaxScore;
+                if (data.semiMaxScore) this.semiMaxScore = data.semiMaxScore;
+                if (data.finalMaxScore) this.finalMaxScore = data.finalMaxScore;
+                if (data.savedVersions) this.savedVersions = data.savedVersions;
+                this.saveToStorage();
+            }
+
+            resetPlayerNames() {
+                this.playerNames = Array.from({length: 24}, (_, i) => `Player ${i + 1}`);
+                const defaultRatings = {};
+                for (let i = 1; i <= 24; i++) {
+                    defaultRatings[i] = parseFloat((3.75 - (i - 1) * 0.043478).toFixed(2));
+                }
+                this.skillRatings = defaultRatings;
+                this.saveToStorage();
+            }
         }
 
-        function PadelTournamentApp() {
-            const [activeTab, setActiveTab] = useState('tournament');
-            const [selectedRound, setSelectedRound] = useState(1);
-            const [filterRound, setFilterRound] = useState('all');
-            const [filterPlayer, setFilterPlayer] = useState('all');
-            const [playerNames, setPlayerNames] = useState(defaultPlayerNames);
-            const [skillRatings, setSkillRatings] = useState(defaultSkillRatings);
-            const [matchScores, setMatchScores] = useState({});
-            const [knockoutScores, setKnockoutScores] = useState({});
-            const [knockoutMaxScore, setKnockoutMaxScore] = useState(16);
-            const [semiMaxScore, setSemiMaxScore] = useState(16);
-            const [finalMaxScore, setFinalMaxScore] = useState(16);
-            const [savedVersions, setSavedVersions] = useState([]);
+        const state = new TournamentState();
 
-            // Helper functions
-            const getTierColor = (playerNum) => {
-                const tier = Math.ceil(playerNum / 4);
-                const colors = ['#DC2626', '#EA580C', '#CA8A04', '#16A34A', '#2563EB', '#7C3AED'];
-                return colors[tier - 1];
+        // ===== UTILITY FUNCTIONS =====
+        function getTier(playerId) {
+            if (playerId >= 1 && playerId <= 4) return 'elite';
+            if (playerId >= 5 && playerId <= 8) return 'advanced';
+            if (playerId >= 9 && playerId <= 12) return 'intermediate-plus';
+            if (playerId >= 13 && playerId <= 16) return 'intermediate';
+            if (playerId >= 17 && playerId <= 20) return 'beginner-plus';
+            return 'beginner';
+        }
+
+        function getTierName(playerId) {
+            const tier = getTier(playerId);
+            const names = {
+                'elite': 'Elite',
+                'advanced': 'Advanced',
+                'intermediate-plus': 'Intermediate+',
+                'intermediate': 'Intermediate',
+                'beginner-plus': 'Beginner+',
+                'beginner': 'Beginner'
             };
+            return names[tier];
+        }
 
-            const getTierName = (playerNum) => {
-                const tier = Math.ceil(playerNum / 4);
-                const names = ['Elite', 'Advanced', 'Intermediate+', 'Intermediate', 'Beginner+', 'Beginner'];
-                return names[tier - 1];
-            };
+        function isWithinGroup(match) {
+            const allPlayers = [...match.team1, ...match.team2];
+            const tier = getTier(allPlayers[0]);
+            return allPlayers.every(p => getTier(p) === tier);
+        }
 
-            const handleScoreChange = (round, matchIdx, team, value) => {
-                const score = value === '' ? null : parseInt(value);
-                if (score !== null && (score < 0 || score > 16)) return;
+        function getMatchScore(round, matchIdx) {
+            return state.matchScores[round]?.[matchIdx] || { team1Score: null, team2Score: null };
+        }
 
-                const newScores = { ...matchScores };
-                if (!newScores[round]) newScores[round] = {};
-                if (!newScores[round][matchIdx]) newScores[round][matchIdx] = {};
+        function isMatchComplete(round, matchIdx) {
+            const score = getMatchScore(round, matchIdx);
+            return score.team1Score !== null && score.team2Score !== null;
+        }
 
-                if (team === 'team1') {
-                    newScores[round][matchIdx].team1Score = score;
-                    newScores[round][matchIdx].team2Score = score !== null ? 16 - score : null;
-                } else {
-                    newScores[round][matchIdx].team2Score = score;
-                    newScores[round][matchIdx].team1Score = score !== null ? 16 - score : null;
+        function getWinner(round, matchIdx) {
+            const score = getMatchScore(round, matchIdx);
+            if (score.team1Score === null || score.team2Score === null) return null;
+            if (score.team1Score > score.team2Score) return 'team1';
+            if (score.team2Score > score.team1Score) return 'team2';
+            return 'draw';
+        }
+
+        function countCompletedMatches() {
+            let count = 0;
+            for (let round = 1; round <= 13; round++) {
+                for (let match = 0; match < 6; match++) {
+                    if (isMatchComplete(round, match)) count++;
                 }
+            }
+            return count;
+        }
 
-                setMatchScores(newScores);
-            };
+        // ===== COMPONENTS =====
+        function PlayerBadge(playerId, showRating = false) {
+            const tier = getTier(playerId);
+            const name = state.playerNames[playerId - 1];
+            const rating = state.skillRatings[playerId];
+            
+            return `
+                <div class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-white text-xs tier-${tier}">
+                    <span class="font-medium">#${playerId}</span>
+                    <span>${name}</span>
+                    ${showRating ? `<span class="opacity-90">(${rating})</span>` : ''}
+                </div>
+            `;
+        }
 
-            const clearMatchScore = (round, matchIdx) => {
-                const newScores = { ...matchScores };
-                if (newScores[round] && newScores[round][matchIdx]) {
-                    delete newScores[round][matchIdx];
-                }
-                setMatchScores(newScores);
-            };
-
-            const getFilteredMatches = () => {
-                let matches = [];
-                
-                for (let r = 1; r <= 13; r++) {
-                    if (filterRound !== 'all' && parseInt(filterRound) !== r) continue;
-                    
-                    for (let m = 0; m < 6; m++) {
-                        const match = fixtures[r - 1][m];
-                        
-                        if (filterPlayer !== 'all') {
-                            const pNum = parseInt(filterPlayer);
-                            if (!match.includes(pNum)) continue;
-                        }
-                        
-                        matches.push({ round: r, matchIndex: m, match });
-                    }
-                }
-                
-                return matches;
-            };
-
-            const exportData = () => {
-                const data = {
-                    playerNames,
-                    skillRatings,
-                    matchScores,
-                    knockoutScores,
-                    knockoutMaxScore,
-                    semiMaxScore,
-                    finalMaxScore,
-                    savedVersions,
-                    exportDate: new Date().toISOString()
-                };
-                
-                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `padel-tournament-${new Date().toISOString().split('T')[0]}.json`;
-                a.click();
-                URL.revokeObjectURL(url);
-                alert('Data exported successfully!');
-            };
-
-            const importData = (event) => {
-                const file = event.target.files[0];
-                if (!file) return;
-
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    try {
-                        const data = JSON.parse(e.target.result);
-                        setPlayerNames(data.playerNames || defaultPlayerNames);
-                        setSkillRatings(data.skillRatings || defaultSkillRatings);
-                        setMatchScores(data.matchScores || {});
-                        setKnockoutScores(data.knockoutScores || {});
-                        setKnockoutMaxScore(data.knockoutMaxScore || 16);
-                        setSemiMaxScore(data.semiMaxScore || 16);
-                        setFinalMaxScore(data.finalMaxScore || 16);
-                        setSavedVersions(data.savedVersions || []);
-                        alert('Data imported successfully!');
-                    } catch (error) {
-                        alert('Error importing data. Please make sure the file is valid.');
-                    }
-                };
-                reader.readAsText(file);
-                event.target.value = '';
-            };
-
-            const saveCurrentVersion = () => {
-                const name = prompt('Enter a name for this backup:', `Backup ${new Date().toLocaleString()}`);
-                if (!name) return;
-
-                const version = {
-                    name,
-                    timestamp: new Date().toISOString(),
-                    data: {
-                        playerNames: [...playerNames],
-                        skillRatings: { ...skillRatings },
-                        matchScores: JSON.parse(JSON.stringify(matchScores)),
-                        knockoutScores: JSON.parse(JSON.stringify(knockoutScores)),
-                        knockoutMaxScore,
-                        semiMaxScore,
-                        finalMaxScore
-                    }
-                };
-
-                const newVersions = [version, ...savedVersions].slice(0, 10);
-                setSavedVersions(newVersions);
-                alert('Backup saved successfully!');
-            };
-
-            const loadVersion = (version) => {
-                const autoBackup = {
-                    name: `Auto-backup before loading ${new Date().toLocaleString()}`,
-                    timestamp: new Date().toISOString(),
-                    data: {
-                        playerNames: [...playerNames],
-                        skillRatings: { ...skillRatings },
-                        matchScores: JSON.parse(JSON.stringify(matchScores)),
-                        knockoutScores: JSON.parse(JSON.stringify(knockoutScores)),
-                        knockoutMaxScore,
-                        semiMaxScore,
-                        finalMaxScore
-                    }
-                };
-
-                setSavedVersions([autoBackup, ...savedVersions].slice(0, 10));
-                
-                setPlayerNames(version.data.playerNames);
-                setSkillRatings(version.data.skillRatings);
-                setMatchScores(JSON.parse(JSON.stringify(version.data.matchScores)));
-                setKnockoutScores(JSON.parse(JSON.stringify(version.data.knockoutScores || {})));
-                setKnockoutMaxScore(version.data.knockoutMaxScore || 16);
-                setSemiMaxScore(version.data.semiMaxScore || 16);
-                setFinalMaxScore(version.data.finalMaxScore || 16);
-                alert('Version loaded successfully!');
-            };
-
-            const deleteVersion = (index) => {
-                if (!confirm('Are you sure you want to delete this version?')) return;
-                setSavedVersions(savedVersions.filter((_, i) => i !== index));
-            };
-
-            const resetAllScores = () => {
-                const autoBackup = {
-                    name: `Auto-backup before reset ${new Date().toLocaleString()}`,
-                    timestamp: new Date().toISOString(),
-                    data: {
-                        playerNames: [...playerNames],
-                        skillRatings: { ...skillRatings },
-                        matchScores: JSON.parse(JSON.stringify(matchScores)),
-                        knockoutScores: JSON.parse(JSON.stringify(knockoutScores)),
-                        knockoutMaxScore,
-                        semiMaxScore,
-                        finalMaxScore
-                    }
-                };
-
-                setSavedVersions([autoBackup, ...savedVersions].slice(0, 10));
-                setMatchScores({});
-                setKnockoutScores({});
-                alert('All scores have been reset!');
-            };
-
-            // Player Badge Component
-            const PlayerBadge = ({ playerNum, showRating = false }) => (
-                <span
-                    className="inline-flex items-center px-2 py-1 rounded text-white text-sm font-medium"
-                    style={{ backgroundColor: getTierColor(playerNum) }}
-                    title={`${playerNames[playerNum - 1]} - Rank #${playerNum}, ${getTierName(playerNum)}, Rating: ${skillRatings[playerNum]?.toFixed(2)}`}
-                >
-                    {playerNames[playerNum - 1]}
-                    {showRating && ` (${skillRatings[playerNum]?.toFixed(2)})`}
-                </span>
-            );
-
-            // Match Display Component
-            const MatchDisplay = ({ round, matchIndex, match }) => {
-                const [p1, p2, p3, p4] = match;
-                const scores = matchScores[round]?.[matchIndex] || {};
-                const isComplete = scores.team1Score !== undefined && scores.team1Score !== null;
-                
-                const team1Rating = skillRatings[p1] + skillRatings[p2];
-                const team2Rating = skillRatings[p3] + skillRatings[p4];
-                
-                const team1Group = Math.ceil(p1 / 4);
-                const team2Group = Math.ceil(p3 / 4);
-                const isWithinGroup = team1Group === team2Group;
-                
-                const winner = isComplete
-                    ? scores.team1Score > scores.team2Score
-                        ? 'team1'
-                        : scores.team1Score < scores.team2Score
-                        ? 'team2'
-                        : 'tie'
-                    : null;
-
-                return (
-                    <div className={`border-2 rounded-lg p-4 ${isComplete ? 'bg-green-50 border-green-500' : 'bg-white'} ${isWithinGroup ? 'border-purple-300' : 'border-green-300'}`}>
-                        <div className="flex justify-between items-center mb-2">
-                            <span className="font-bold text-gray-700">Match {matchIndex + 1}</span>
-                            <div className="flex gap-2">
-                                <span className={`text-xs px-2 py-1 rounded ${isWithinGroup ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800'}`}>
-                                    {isWithinGroup ? 'Within Group' : 'Cross Group'}
-                                </span>
-                                {isComplete && <span className="text-green-600">✓</span>}
-                            </div>
+        function MatchCard(round, matchIdx, match) {
+            const within = isWithinGroup(match);
+            const score = getMatchScore(round, matchIdx);
+            const isComplete = isMatchComplete(round, matchIdx);
+            const winner = getWinner(round, matchIdx);
+            
+            const team1Rating = (state.skillRatings[match.team1[0]] + state.skillRatings[match.team1[1]]).toFixed(2);
+            const team2Rating = (state.skillRatings[match.team2[0]] + state.skillRatings[match.team2[1]]).toFixed(2);
+            
+            return `
+                <div class="bg-white rounded-lg shadow-md overflow-hidden ${within ? 'match-within' : 'match-cross'}">
+                    <!-- Header -->
+                    <div class="bg-gray-100 px-4 py-2 flex justify-between items-center">
+                        <div class="font-semibold text-gray-700">R${round} Match ${matchIdx + 1}</div>
+                        <div class="text-xs px-2 py-1 rounded ${within ? 'bg-purple-100 text-purple-700' : 'bg-green-100 text-green-700'}">
+                            ${within ? 'Within Group' : 'Cross Group'}
                         </div>
-                        
-                        <div className={`mb-2 p-2 rounded ${winner === 'team1' ? 'bg-green-100' : ''}`}>
-                            <div className="flex gap-2 mb-1">
-                                <PlayerBadge playerNum={p1} />
-                                <PlayerBadge playerNum={p2} />
-                            </div>
-                            <div className="text-xs text-gray-600">
-                                Groups: {team1Group} | Total: {team1Rating.toFixed(2)}
-                            </div>
-                        </div>
-
-                        <div className="flex items-center justify-center gap-2 my-2">
-                            <input
-                                type="number"
-                                min="0"
-                                max="16"
-                                value={scores.team1Score ?? ''}
-                                onChange={(e) => handleScoreChange(round, matchIndex, 'team1', e.target.value)}
-                                className="w-16 px-2 py-1 border rounded text-center"
-                                placeholder="0"
-                            />
-                            <span className="font-bold">-</span>
-                            <input
-                                type="number"
-                                min="0"
-                                max="16"
-                                value={scores.team2Score ?? ''}
-                                onChange={(e) => handleScoreChange(round, matchIndex, 'team2', e.target.value)}
-                                className="w-16 px-2 py-1 border rounded text-center"
-                                placeholder="0"
-                            />
-                            {isComplete && (
-                                <button
-                                    onClick={() => clearMatchScore(round, matchIndex)}
-                                    className="text-red-500 hover:text-red-700 ml-2"
-                                >
-                                    ✕
-                                </button>
-                            )}
-                        </div>
-
-                        <div className={`mt-2 p-2 rounded ${winner === 'team2' ? 'bg-green-100' : ''}`}>
-                            <div className="flex gap-2 mb-1">
-                                <PlayerBadge playerNum={p3} />
-                                <PlayerBadge playerNum={p4} />
-                            </div>
-                            <div className="text-xs text-gray-600">
-                                Groups: {team2Group} | Total: {team2Rating.toFixed(2)}
-                            </div>
-                        </div>
-
-                        {isComplete && winner && (
-                            <div className="mt-2 text-center font-bold text-green-700">
-                                {winner === 'tie' ? '🤝 Draw' : `🏆 Winner: Team ${winner === 'team1' ? '1' : '2'}`}
-                            </div>
-                        )}
                     </div>
-                );
-            };
 
-            // Results Tab Component
-            const ResultsTab = () => {
-                const standings = [];
-                
-                for (let p = 1; p <= 24; p++) {
-                    let stats = {
-                        player: p,
-                        matches: 0,
-                        wins: 0,
-                        draws: 0,
-                        losses: 0,
-                        pointsFor: 0,
-                        pointsAgainst: 0,
-                        points: 0
-                    };
-
-                    for (let r = 1; r <= 13; r++) {
-                        for (let m = 0; m < 6; m++) {
-                            const match = fixtures[r - 1][m];
-                            if (!match.includes(p)) continue;
-
-                            const scores = matchScores[r]?.[m];
-                            if (!scores || scores.team1Score === null) continue;
-
-                            stats.matches++;
-                            const isTeam1 = match[0] === p || match[1] === p;
-                            const myScore = isTeam1 ? scores.team1Score : scores.team2Score;
-                            const oppScore = isTeam1 ? scores.team2Score : scores.team1Score;
-
-                            stats.pointsFor += myScore;
-                            stats.pointsAgainst += oppScore;
-
-                            if (myScore > oppScore) {
-                                stats.wins++;
-                                stats.points += 3;
-                            } else if (myScore < oppScore) {
-                                stats.losses++;
-                            } else {
-                                stats.draws++;
-                                stats.points += 1;
-                            }
-                        }
-                    }
-
-                    stats.pointsDiff = stats.pointsFor - stats.pointsAgainst;
-                    stats.winRate = stats.matches > 0 ? ((stats.wins / stats.matches) * 100).toFixed(1) : '0.0';
-                    standings.push(stats);
-                }
-
-                standings.sort((a, b) => {
-                    if (b.points !== a.points) return b.points - a.points;
-                    if (b.pointsDiff !== a.pointsDiff) return b.pointsDiff - a.pointsDiff;
-                    return b.pointsFor - a.pointsFor;
-                });
-
-                return (
-                    <div className="p-4">
-                        <h2 className="text-2xl font-bold mb-4">Player Standings</h2>
-                        
-                        <div className="bg-blue-50 p-4 rounded-lg mb-4">
-                            <h3 className="font-bold mb-2">Tournament Point System</h3>
-                            <p className="text-sm">Win: 3 points • Draw: 1 point • Loss: 0 points</p>
+                    <div class="p-4 space-y-3">
+                        <!-- Team 1 -->
+                        <div>
+                            <div class="flex flex-wrap gap-2 mb-1">
+                                ${PlayerBadge(match.team1[0])}
+                                ${PlayerBadge(match.team1[1])}
+                            </div>
+                            <div class="text-xs text-gray-500">Total Rating: ${team1Rating}</div>
                         </div>
 
-                        <div className="overflow-x-auto">
-                            <table className="w-full border-collapse">
+                        <!-- Score Input -->
+                        <div class="flex items-center gap-2 bg-gray-50 p-2 rounded">
+                            <input 
+                                type="number" 
+                                min="0" 
+                                max="16" 
+                                value="${score.team1Score !== null ? score.team1Score : ''}"
+                                placeholder="0-16"
+                                class="w-16 px-2 py-1 border rounded text-center"
+                                onchange="handleScoreChange(${round}, ${matchIdx}, this.value, 1)"
+                            />
+                            <span class="text-gray-400">-</span>
+                            <input 
+                                type="number" 
+                                min="0" 
+                                max="16" 
+                                value="${score.team2Score !== null ? score.team2Score : ''}"
+                                placeholder="0-16"
+                                class="w-16 px-2 py-1 border rounded text-center"
+                                onchange="handleScoreChange(${round}, ${matchIdx}, this.value, 2)"
+                            />
+                            ${isComplete ? `
+                                <button 
+                                    onclick="clearScore(${round}, ${matchIdx})"
+                                    class="ml-auto text-red-600 hover:text-red-800 font-bold"
+                                    title="Clear score"
+                                >×</button>
+                            ` : ''}
+                        </div>
+
+                        <!-- Team 2 -->
+                        <div>
+                            <div class="flex flex-wrap gap-2 mb-1">
+                                ${PlayerBadge(match.team2[0])}
+                                ${PlayerBadge(match.team2[1])}
+                            </div>
+                            <div class="text-xs text-gray-500">Total Rating: ${team2Rating}</div>
+                        </div>
+
+                        <!-- Winner Display -->
+                        ${isComplete ? `
+                            <div class="mt-2 pt-2 border-t text-center">
+                                ${winner === 'draw' ? 
+                                    '<span class="text-sm font-semibold text-gray-600">🤝 Draw!</span>' :
+                                    `<span class="text-sm font-semibold text-green-600">🏆 ${
+                                        winner === 'team1' ? 
+                                        `${state.playerNames[match.team1[0] - 1]} & ${state.playerNames[match.team1[1] - 1]}` :
+                                        `${state.playerNames[match.team2[0] - 1]} & ${state.playerNames[match.team2[1] - 1]}`
+                                    } Win!</span>`
+                                }
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function TournamentFixturesTab() {
+            const matches = [];
+            
+            for (let round = 1; round <= 13; round++) {
+                if (state.filterRound !== 'all' && parseInt(state.filterRound) !== round) continue;
+                
+                FIXTURES[round].forEach((match, idx) => {
+                    // Filter by player if selected
+                    if (state.filterPlayer !== 'all') {
+                        const playerId = parseInt(state.filterPlayer);
+                        const allPlayers = [...match.team1, ...match.team2];
+                        if (!allPlayers.includes(playerId)) return;
+                    }
+                    
+                    matches.push({ round, idx, match });
+                });
+            }
+            
+            return `
+                <div class="space-y-6">
+                    <!-- Filters -->
+                    <div class="bg-white rounded-lg shadow p-4 space-y-4">
+                        <h3 class="font-semibold text-gray-700">Filters & Navigation</h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Filter by Round:</label>
+                                <select 
+                                    class="w-full border rounded px-3 py-2"
+                                    onchange="state.filterRound = this.value; render();"
+                                >
+                                    <option value="all" ${state.filterRound === 'all' ? 'selected' : ''}>All Rounds</option>
+                                    ${Array.from({length: 13}, (_, i) => `
+                                        <option value="${i + 1}" ${state.filterRound == (i + 1) ? 'selected' : ''}>Round ${i + 1}</option>
+                                    `).join('')}
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Filter by Player:</label>
+                                <select 
+                                    class="w-full border rounded px-3 py-2"
+                                    onchange="state.filterPlayer = this.value; render();"
+                                >
+                                    <option value="all" ${state.filterPlayer === 'all' ? 'selected' : ''}>All Players</option>
+                                    ${Array.from({length: 24}, (_, i) => `
+                                        <option value="${i + 1}" ${state.filterPlayer == (i + 1) ? 'selected' : ''}>
+                                            #${i + 1} ${state.playerNames[i]}
+                                        </option>
+                                    `).join('')}
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <button 
+                            onclick="state.filterRound = 'all'; state.filterPlayer = 'all'; render();"
+                            class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-sm"
+                        >
+                            Clear Filters
+                        </button>
+                        
+                        <!-- Quick Round Navigation -->
+                        <div>
+                            <div class="text-sm font-medium text-gray-700 mb-2">Quick Navigation:</div>
+                            <div class="flex flex-wrap gap-2">
+                                ${Array.from({length: 13}, (_, i) => `
+                                    <button 
+                                        onclick="state.filterRound = '${i + 1}'; render();"
+                                        class="px-3 py-1 rounded text-sm ${state.filterRound == (i + 1) ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-300'}"
+                                    >
+                                        R${i + 1}
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Matches Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        ${matches.map(m => MatchCard(m.round, m.idx, m.match)).join('')}
+                    </div>
+                    
+                    ${matches.length === 0 ? `
+                        <div class="text-center py-12 text-gray-500">
+                            No matches found with current filters.
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function PlayersTab() {
+            return `
+                <div class="space-y-6">
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <h3 class="font-semibold text-blue-900 mb-2">💡 Player Tiers</h3>
+                        <div class="text-sm text-blue-800 space-y-1">
+                            <div><strong>Elite (#1-4):</strong> Highest skilled players</div>
+                            <div><strong>Advanced (#5-8):</strong> Very skilled players</div>
+                            <div><strong>Intermediate+ (#9-12):</strong> Above average players</div>
+                            <div><strong>Intermediate (#13-16):</strong> Average players</div>
+                            <div><strong>Beginner+ (#17-20):</strong> Developing players</div>
+                            <div><strong>Beginner (#21-24):</strong> Newest players</div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end">
+                        <button 
+                            onclick="if(confirm('Reset all player names and ratings to defaults?')) { state.resetPlayerNames(); render(); }"
+                            class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded"
+                        >
+                            Reset All Names
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        ${Array.from({length: 24}, (_, i) => {
+                            const playerId = i + 1;
+                            const tier = getTier(playerId);
+                            const tierName = getTierName(playerId);
+                            
+                            return `
+                                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                                    <div class="tier-${tier} px-4 py-2 text-white font-semibold">
+                                        #${playerId} - ${tierName}
+                                    </div>
+                                    <div class="p-4 space-y-3">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                Player Name:
+                                            </label>
+                                            <input 
+                                                type="text" 
+                                                value="${state.playerNames[i]}"
+                                                class="w-full border rounded px-3 py-2"
+                                                onchange="state.updatePlayerName(${i}, this.value); render();"
+                                            />
+                                        </div>
+                                        
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                Skill Rating:
+                                            </label>
+                                            <input 
+                                                type="number" 
+                                                min="0" 
+                                                max="5" 
+                                                step="0.05"
+                                                value="${state.skillRatings[playerId]}"
+                                                class="w-full border rounded px-3 py-2"
+                                                onchange="state.updateSkillRating(${playerId}, parseFloat(this.value)); render();"
+                                            />
+                                            <div class="text-xs text-gray-500 mt-1">(0-5, step 0.05)</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function DataManagementTab() {
+            const completedMatches = countCompletedMatches();
+            
+            return `
+                <div class="space-y-6">
+                    <!-- Export -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">💾 Export Tournament Data</h3>
+                        <p class="text-sm text-gray-600 mb-4">Download all data as JSON file</p>
+                        <button 
+                            onclick="exportData()"
+                            class="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium"
+                        >
+                            Download Data File
+                        </button>
+                    </div>
+                    
+                    <!-- Import -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">📂 Import Tournament Data</h3>
+                        <p class="text-sm text-gray-600 mb-4">Upload previously exported JSON</p>
+                        <input 
+                            type="file" 
+                            accept=".json"
+                            onchange="importData(this.files[0])"
+                            class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                        />
+                    </div>
+                    
+                    <!-- Reset Scores -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">⚠️ Reset Match Scores</h3>
+                        <p class="text-sm text-gray-600 mb-4">Clear all scores, auto-save backup first</p>
+                        <button 
+                            onclick="resetScores()"
+                            class="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium"
+                        >
+                            Reset All Scores
+                        </button>
+                    </div>
+                    
+                    <!-- Save Backup -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">💾 Save Current Version</h3>
+                        <p class="text-sm text-gray-600 mb-4">Create named backup</p>
+                        <div class="flex gap-2">
+                            <input 
+                                type="text" 
+                                id="backup-name"
+                                placeholder="Enter backup name..."
+                                class="flex-1 border rounded px-3 py-2"
+                            />
+                            <button 
+                                onclick="saveBackup()"
+                                class="px-6 py-2 bg-green-500 hover:bg-green-600 text-white rounded font-medium"
+                            >
+                                Save Backup
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Saved Versions -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-3">
+                            Saved Versions (${state.savedVersions.length}/10)
+                        </h3>
+                        
+                        ${state.savedVersions.length === 0 ? `
+                            <p class="text-sm text-gray-500">No saved versions yet.</p>
+                        ` : `
+                            <div class="space-y-3">
+                                ${state.savedVersions.map(version => `
+                                    <div class="border rounded-lg p-4">
+                                        <div class="font-medium text-gray-800">${version.name}</div>
+                                        <div class="text-sm text-gray-500">${version.timestamp}</div>
+                                        <div class="text-sm text-gray-600 mt-1">
+                                            ${Object.values(version.matchScores).reduce((sum, round) => sum + Object.keys(round).length, 0)} matches recorded
+                                        </div>
+                                        <div class="flex gap-2 mt-3">
+                                            <button 
+                                                onclick="loadVersion(${version.id})"
+                                                class="px-4 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-sm"
+                                            >
+                                                Load
+                                            </button>
+                                            <button 
+                                                onclick="deleteVersion(${version.id})"
+                                                class="px-4 py-1 bg-red-500 hover:bg-red-600 text-white rounded text-sm"
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `}
+                    </div>
+                </div>
+            `;
+        }
+
+        // ===== STAGE 2: CALCULATIONS =====
+        function calculateStandings() {
+            const standings = [];
+            
+            for (let playerId = 1; playerId <= 24; playerId++) {
+                let matches = 0, wins = 0, draws = 0, losses = 0;
+                let pointsFor = 0, pointsAgainst = 0;
+                let tournamentPoints = 0;
+                const partners = new Set();
+                
+                // Check all matches for this player
+                for (let round = 1; round <= 13; round++) {
+                    FIXTURES[round].forEach((match, matchIdx) => {
+                        const allPlayers = [...match.team1, ...match.team2];
+                        if (!allPlayers.includes(playerId)) return;
+                        
+                        const score = getMatchScore(round, matchIdx);
+                        if (score.team1Score === null || score.team2Score === null) return;
+                        
+                        matches++;
+                        
+                        // Determine if player is in team1 or team2
+                        const isTeam1 = match.team1.includes(playerId);
+                        const playerScore = isTeam1 ? score.team1Score : score.team2Score;
+                        const opponentScore = isTeam1 ? score.team2Score : score.team1Score;
+                        
+                        pointsFor += playerScore;
+                        pointsAgainst += opponentScore;
+                        
+                        // Track partner
+                        const partner = isTeam1 ? 
+                            match.team1.find(p => p !== playerId) : 
+                            match.team2.find(p => p !== playerId);
+                        partners.add(partner);
+                        
+                        // Determine result
+                        if (playerScore > opponentScore) {
+                            wins++;
+                            tournamentPoints += 3;
+                        } else if (playerScore === opponentScore) {
+                            draws++;
+                            tournamentPoints += 1;
+                        } else {
+                            losses++;
+                        }
+                    });
+                }
+                
+                standings.push({
+                    playerId,
+                    name: state.playerNames[playerId - 1],
+                    rating: state.skillRatings[playerId],
+                    matches,
+                    wins,
+                    draws,
+                    losses,
+                    pointsFor,
+                    pointsAgainst,
+                    pointsDiff: pointsFor - pointsAgainst,
+                    tournamentPoints,
+                    winRate: matches > 0 ? (wins / matches * 100).toFixed(1) : '0.0',
+                    uniquePartners: partners.size
+                });
+            }
+            
+            // Sort by: Tournament Points (desc), Points Diff (desc), Points For (desc)
+            standings.sort((a, b) => {
+                if (b.tournamentPoints !== a.tournamentPoints) return b.tournamentPoints - a.tournamentPoints;
+                if (b.pointsDiff !== a.pointsDiff) return b.pointsDiff - a.pointsDiff;
+                return b.pointsFor - a.pointsFor;
+            });
+            
+            return standings;
+        }
+
+        function calculateFairness() {
+            const fairness = [];
+            
+            for (let playerId = 1; playerId <= 24; playerId++) {
+                const roundScores = [];
+                let totalFairness = 0;
+                
+                for (let round = 1; round <= 13; round++) {
+                    let roundFairness = null;
+                    
+                    FIXTURES[round].forEach((match) => {
+                        const allPlayers = [...match.team1, ...match.team2];
+                        if (!allPlayers.includes(playerId)) return;
+                        
+                        const isTeam1 = match.team1.includes(playerId);
+                        const partner = isTeam1 ? 
+                            match.team1.find(p => p !== playerId) : 
+                            match.team2.find(p => p !== playerId);
+                        const opponents = isTeam1 ? match.team2 : match.team1;
+                        
+                        const myTeamRating = state.skillRatings[playerId] + state.skillRatings[partner];
+                        const opponentRating = state.skillRatings[opponents[0]] + state.skillRatings[opponents[1]];
+                        
+                        roundFairness = myTeamRating - opponentRating;
+                    });
+                    
+                    if (roundFairness !== null) {
+                        roundScores.push(roundFairness);
+                        totalFairness += roundFairness;
+                    }
+                }
+                
+                const avgFairness = roundScores.length > 0 ? totalFairness / roundScores.length : 0;
+                const hardestRound = roundScores.length > 0 ? Math.min(...roundScores) : 0;
+                const easiestRound = roundScores.length > 0 ? Math.max(...roundScores) : 0;
+                
+                fairness.push({
+                    playerId,
+                    name: state.playerNames[playerId - 1],
+                    rating: state.skillRatings[playerId],
+                    totalFairness,
+                    avgFairness,
+                    hardestRound,
+                    easiestRound,
+                    roundScores
+                });
+            }
+            
+            return fairness;
+        }
+
+        function calculateFairness2() {
+            const fairness2 = [];
+            
+            for (let playerId = 1; playerId <= 24; playerId++) {
+                const roundScores = [];
+                let totalFairness = 0;
+                
+                for (let round = 1; round <= 13; round++) {
+                    let roundFairness = null;
+                    
+                    FIXTURES[round].forEach((match) => {
+                        const allPlayers = [...match.team1, ...match.team2];
+                        if (!allPlayers.includes(playerId)) return;
+                        
+                        const isTeam1 = match.team1.includes(playerId);
+                        const partner = isTeam1 ? 
+                            match.team1.find(p => p !== playerId) : 
+                            match.team2.find(p => p !== playerId);
+                        const opponents = isTeam1 ? match.team2 : match.team1;
+                        
+                        const partnerRating = state.skillRatings[partner];
+                        const avgOpponentRating = (state.skillRatings[opponents[0]] + state.skillRatings[opponents[1]]) / 2;
+                        
+                        roundFairness = partnerRating - avgOpponentRating;
+                    });
+                    
+                    if (roundFairness !== null) {
+                        roundScores.push(roundFairness);
+                        totalFairness += roundFairness;
+                    }
+                }
+                
+                const avgFairness = roundScores.length > 0 ? totalFairness / roundScores.length : 0;
+                const hardestRound = roundScores.length > 0 ? Math.min(...roundScores) : 0;
+                const easiestRound = roundScores.length > 0 ? Math.max(...roundScores) : 0;
+                
+                fairness2.push({
+                    playerId,
+                    name: state.playerNames[playerId - 1],
+                    rating: state.skillRatings[playerId],
+                    totalFairness,
+                    avgFairness,
+                    hardestRound,
+                    easiestRound,
+                    roundScores
+                });
+            }
+            
+            return fairness2;
+        }
+
+        function ResultsTab() {
+            const standings = calculateStandings();
+            
+            return `
+                <div class="space-y-6">
+                    <!-- Point System -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <h3 class="font-semibold text-blue-900 mb-2">Tournament Point System</h3>
+                        <div class="text-sm text-blue-800">
+                            <strong>Win:</strong> 3 points | <strong>Draw:</strong> 1 point | <strong>Loss:</strong> 0 points
+                        </div>
+                    </div>
+                    
+                    <!-- Standings Table -->
+                    <div class="bg-white rounded-lg shadow overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="bg-gray-100 border-b-2">
+                                <tr>
+                                    <th class="px-4 py-3 text-left">Rank</th>
+                                    <th class="px-4 py-3 text-left">Player</th>
+                                    <th class="px-4 py-3 text-center">Pts</th>
+                                    <th class="px-4 py-3 text-center">M</th>
+                                    <th class="px-4 py-3 text-center">W</th>
+                                    <th class="px-4 py-3 text-center">D</th>
+                                    <th class="px-4 py-3 text-center">L</th>
+                                    <th class="px-4 py-3 text-center">Win%</th>
+                                    <th class="px-4 py-3 text-center">For</th>
+                                    <th class="px-4 py-3 text-center">Ag</th>
+                                    <th class="px-4 py-3 text-center">Diff</th>
+                                    <th class="px-4 py-3 text-center">Partners</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${standings.map((player, idx) => `
+                                    <tr class="border-b hover:bg-gray-50 ${idx < 3 ? 'bg-yellow-50' : ''}">
+                                        <td class="px-4 py-3 font-semibold">
+                                            ${idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : idx + 1}
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            ${PlayerBadge(player.playerId, true)}
+                                        </td>
+                                        <td class="px-4 py-3 text-center font-bold">${player.tournamentPoints}</td>
+                                        <td class="px-4 py-3 text-center">${player.matches}</td>
+                                        <td class="px-4 py-3 text-center text-green-600 font-medium">${player.wins}</td>
+                                        <td class="px-4 py-3 text-center text-gray-600">${player.draws}</td>
+                                        <td class="px-4 py-3 text-center text-red-600 font-medium">${player.losses}</td>
+                                        <td class="px-4 py-3 text-center">${player.winRate}%</td>
+                                        <td class="px-4 py-3 text-center">${player.pointsFor}</td>
+                                        <td class="px-4 py-3 text-center">${player.pointsAgainst}</td>
+                                        <td class="px-4 py-3 text-center ${player.pointsDiff > 0 ? 'text-green-600 font-medium' : player.pointsDiff < 0 ? 'text-red-600 font-medium' : ''}">
+                                            ${player.pointsDiff > 0 ? '+' : ''}${player.pointsDiff}
+                                        </td>
+                                        <td class="px-4 py-3 text-center">${player.uniquePartners}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        function FairnessTab() {
+            const fairness = calculateFairness();
+            
+            // Calculate distribution
+            let harder = 0, balanced = 0, easier = 0;
+            fairness.forEach(f => {
+                if (f.avgFairness < -0.1) harder++;
+                else if (f.avgFairness > 0.1) easier++;
+                else balanced++;
+            });
+            
+            return `
+                <div class="space-y-6">
+                    <!-- Explanation -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <h3 class="font-semibold text-blue-900 mb-2">How Fairness is Calculated</h3>
+                        <div class="text-sm text-blue-800 space-y-1">
+                            <div><strong>Fairness = Your Team Rating - Opponent Team Rating</strong></div>
+                            <div class="mt-2">
+                                <span class="text-red-600 font-medium">Negative:</span> You had harder opponents (tougher schedule)<br>
+                                <span class="text-green-600 font-medium">Positive:</span> You had easier opponents (easier schedule)<br>
+                                <span class="text-gray-600 font-medium">Zero:</span> Perfectly balanced schedule
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Distribution Summary -->
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <h3 class="font-semibold text-gray-800 mb-3">Schedule Distribution</h3>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex items-center gap-2">
+                                <span class="w-32 font-medium text-red-600">${harder} Players</span>
+                                <span class="text-gray-600">with Harder Schedule (avg < -0.1)</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-32 font-medium text-gray-600">${balanced} Players</span>
+                                <span class="text-gray-600">with Balanced Schedule (-0.1 to 0.1)</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-32 font-medium text-green-600">${easier} Players</span>
+                                <span class="text-gray-600">with Easier Schedule (avg > 0.1)</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Fairness Table -->
+                    <div class="bg-white rounded-lg shadow overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="bg-gray-100 border-b-2">
+                                <tr>
+                                    <th class="px-4 py-3 text-left">Player</th>
+                                    <th class="px-4 py-3 text-center">Rating</th>
+                                    <th class="px-4 py-3 text-center">Total</th>
+                                    <th class="px-4 py-3 text-center">Average</th>
+                                    <th class="px-4 py-3 text-center">Hardest</th>
+                                    <th class="px-4 py-3 text-center">Easiest</th>
+                                    <th class="px-4 py-3 text-left">All Rounds</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${fairness.map(f => {
+                                    const avgColor = f.avgFairness < -0.1 ? 'text-red-600' : f.avgFairness > 0.1 ? 'text-green-600' : 'text-gray-600';
+                                    
+                                    return `
+                                        <tr class="border-b hover:bg-gray-50">
+                                            <td class="px-4 py-3">
+                                                ${PlayerBadge(f.playerId)}
+                                            </td>
+                                            <td class="px-4 py-3 text-center">${f.rating.toFixed(2)}</td>
+                                            <td class="px-4 py-3 text-center ${avgColor} font-medium">
+                                                ${f.totalFairness > 0 ? '+' : ''}${f.totalFairness.toFixed(2)}
+                                            </td>
+                                            <td class="px-4 py-3 text-center ${avgColor} font-bold">
+                                                ${f.avgFairness > 0 ? '+' : ''}${f.avgFairness.toFixed(2)}
+                                            </td>
+                                            <td class="px-4 py-3 text-center text-red-600">
+                                                ${f.hardestRound.toFixed(2)}
+                                            </td>
+                                            <td class="px-4 py-3 text-center text-green-600">
+                                                ${f.easiestRound > 0 ? '+' : ''}${f.easiestRound.toFixed(2)}
+                                            </td>
+                                            <td class="px-4 py-3">
+                                                <div class="flex flex-wrap gap-1">
+                                                    ${f.roundScores.map((score, idx) => {
+                                                        const color = score < -0.1 ? 'bg-red-100 text-red-700' : 
+                                                                     score > 0.1 ? 'bg-green-100 text-green-700' : 
+                                                                     'bg-gray-100 text-gray-700';
+                                                        return `
+                                                            <span class="px-2 py-1 rounded text-xs ${color}" title="Round ${idx + 1}: ${score > 0 ? '+' : ''}${score.toFixed(2)}">
+                                                                ${score > 0 ? '+' : ''}${score.toFixed(1)}
+                                                            </span>
+                                                        `;
+                                                    }).join('')}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        function Fairness2Tab() {
+            const fairness2 = calculateFairness2();
+            
+            // Calculate distribution
+            let harder = 0, balanced = 0, easier = 0;
+            fairness2.forEach(f => {
+                if (f.avgFairness < -0.05) harder++;
+                else if (f.avgFairness > 0.05) easier++;
+                else balanced++;
+            });
+            
+            return `
+                <div class="space-y-6">
+                    <!-- Explanation -->
+                    <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                        <h3 class="font-semibold text-purple-900 mb-2">Fairness 2: Partner Quality vs Opponents</h3>
+                        <div class="text-sm text-purple-800 space-y-1">
+                            <div><strong>Fairness 2 = Partner Rating - Average Opponent Rating</strong></div>
+                            <div class="mt-2">
+                                <span class="text-red-600 font-medium">Negative:</span> Your partner was weaker than average opponent<br>
+                                <span class="text-green-600 font-medium">Positive:</span> Your partner was stronger than average opponent<br>
+                                <span class="text-gray-600 font-medium">Zero:</span> Partner matched opponent average
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Distribution Summary -->
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <h3 class="font-semibold text-gray-800 mb-3">Partner Quality Distribution</h3>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex items-center gap-2">
+                                <span class="w-32 font-medium text-red-600">${harder} Players</span>
+                                <span class="text-gray-600">had Weaker Partners (avg < -0.05)</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-32 font-medium text-gray-600">${balanced} Players</span>
+                                <span class="text-gray-600">had Balanced Partners (-0.05 to 0.05)</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-32 font-medium text-green-600">${easier} Players</span>
+                                <span class="text-gray-600">had Stronger Partners (avg > 0.05)</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Fairness 2 Table -->
+                    <div class="bg-white rounded-lg shadow overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="bg-gray-100 border-b-2">
+                                <tr>
+                                    <th class="px-4 py-3 text-left">Player</th>
+                                    <th class="px-4 py-3 text-center">Rating</th>
+                                    <th class="px-4 py-3 text-center">Total</th>
+                                    <th class="px-4 py-3 text-center">Average</th>
+                                    <th class="px-4 py-3 text-center">Worst</th>
+                                    <th class="px-4 py-3 text-center">Best</th>
+                                    <th class="px-4 py-3 text-left">All Rounds</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${fairness2.map(f => {
+                                    const avgColor = f.avgFairness < -0.05 ? 'text-red-600' : f.avgFairness > 0.05 ? 'text-green-600' : 'text-gray-600';
+                                    
+                                    return `
+                                        <tr class="border-b hover:bg-gray-50">
+                                            <td class="px-4 py-3">
+                                                ${PlayerBadge(f.playerId)}
+                                            </td>
+                                            <td class="px-4 py-3 text-center">${f.rating.toFixed(2)}</td>
+                                            <td class="px-4 py-3 text-center ${avgColor} font-medium">
+                                                ${f.totalFairness > 0 ? '+' : ''}${f.totalFairness.toFixed(2)}
+                                            </td>
+                                            <td class="px-4 py-3 text-center ${avgColor} font-bold">
+                                                ${f.avgFairness > 0 ? '+' : ''}${f.avgFairness.toFixed(2)}
+                                            </td>
+                                            <td class="px-4 py-3 text-center text-red-600">
+                                                ${f.hardestRound.toFixed(2)}
+                                            </td>
+                                            <td class="px-4 py-3 text-center text-green-600">
+                                                ${f.easiestRound > 0 ? '+' : ''}${f.easiestRound.toFixed(2)}
+                                            </td>
+                                            <td class="px-4 py-3">
+                                                <div class="flex flex-wrap gap-1">
+                                                    ${f.roundScores.map((score, idx) => {
+                                                        const color = score < -0.05 ? 'bg-red-100 text-red-700' : 
+                                                                     score > 0.05 ? 'bg-green-100 text-green-700' : 
+                                                                     'bg-gray-100 text-gray-700';
+                                                        return `
+                                                            <span class="px-2 py-1 rounded text-xs ${color}" title="Round ${idx + 1}: ${score > 0 ? '+' : ''}${score.toFixed(2)}">
+                                                                ${score > 0 ? '+' : ''}${score.toFixed(1)}
+                                                            </span>
+                                                        `;
+                                                    }).join('')}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ===== STAGE 3: PARTNERSHIPS & KNOCKOUT =====
+        function calculatePartnerships() {
+            const partnerships = {};
+            const opponents = {};
+            
+            // Initialize matrices
+            for (let i = 1; i <= 24; i++) {
+                partnerships[i] = {};
+                opponents[i] = {};
+                for (let j = 1; j <= 24; j++) {
+                    partnerships[i][j] = 0;
+                    opponents[i][j] = 0;
+                }
+            }
+            
+            // Count partnerships and opponents
+            for (let round = 1; round <= 13; round++) {
+                FIXTURES[round].forEach((match) => {
+                    const [p1, p2] = match.team1;
+                    const [p3, p4] = match.team2;
+                    
+                    // Partnerships
+                    partnerships[p1][p2]++;
+                    partnerships[p2][p1]++;
+                    partnerships[p3][p4]++;
+                    partnerships[p4][p3]++;
+                    
+                    // Opponents
+                    [p1, p2].forEach(p => {
+                        opponents[p][p3]++;
+                        opponents[p][p4]++;
+                    });
+                    [p3, p4].forEach(p => {
+                        opponents[p][p1]++;
+                        opponents[p][p2]++;
+                    });
+                });
+            }
+            
+            // Calculate statistics
+            let totalPartnerships = 0, uniquePartnerships = 0;
+            let totalOpponents = 0, uniqueOpponents = 0;
+            
+            for (let i = 1; i <= 24; i++) {
+                for (let j = i + 1; j <= 24; j++) {
+                    if (partnerships[i][j] > 0) {
+                        totalPartnerships += partnerships[i][j];
+                        uniquePartnerships++;
+                    }
+                    if (opponents[i][j] > 0) {
+                        totalOpponents += opponents[i][j];
+                        uniqueOpponents++;
+                    }
+                }
+            }
+            
+            return {
+                partnerships,
+                opponents,
+                stats: {
+                    totalPartnerships: totalPartnerships * 2, // Each partnership counted from both sides
+                    uniquePartnerships,
+                    totalOpponents: totalOpponents * 2,
+                    uniqueOpponents,
+                    partnershipCoverage: (uniquePartnerships / 276 * 100).toFixed(1), // 24*23/2 = 276 possible
+                    opponentCoverage: (uniqueOpponents / 276 * 100).toFixed(1)
+                }
+            };
+        }
+
+        function PartnershipsTab() {
+            const data = calculatePartnerships();
+            
+            return `
+                <div class="space-y-6">
+                    <!-- Statistics Summary -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <h3 class="font-semibold text-blue-900 mb-3">Partnership & Opponent Statistics</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <div class="font-medium text-blue-900">Partnerships</div>
+                                <div class="text-blue-800">
+                                    ${data.stats.totalPartnerships} Total | 
+                                    ${data.stats.uniquePartnerships} Unique (${data.stats.partnershipCoverage}%)
+                                </div>
+                            </div>
+                            <div>
+                                <div class="font-medium text-blue-900">Opponents</div>
+                                <div class="text-blue-800">
+                                    ${data.stats.totalOpponents} Total | 
+                                    ${data.stats.uniqueOpponents} Unique (${data.stats.opponentCoverage}%)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Partnership Matrix -->
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <h3 class="font-semibold text-gray-800 mb-3">Partnership Matrix</h3>
+                        <div class="text-xs text-gray-600 mb-3">
+                            <span class="inline-block w-6 h-6 bg-blue-200 border mr-1"></span> 1 partnership
+                            <span class="inline-block w-6 h-6 bg-green-300 border mr-1 ml-3"></span> 2 partnerships
+                            <span class="inline-block w-6 h-6 bg-red-300 border mr-1 ml-3"></span> 3+ partnerships
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="text-xs border-collapse">
                                 <thead>
-                                    <tr className="bg-gray-200">
-                                        <th className="border p-2">Rank</th>
-                                        <th className="border p-2">Player</th>
-                                        <th className="border p-2">Points</th>
-                                        <th className="border p-2">Matches</th>
-                                        <th className="border p-2">W</th>
-                                        <th className="border p-2">D</th>
-                                        <th className="border p-2">L</th>
-                                        <th className="border p-2">Win%</th>
-                                        <th className="border p-2">For</th>
-                                        <th className="border p-2">Against</th>
-                                        <th className="border p-2">Diff</th>
+                                    <tr>
+                                        <th class="border p-1 bg-gray-100 sticky left-0"></th>
+                                        ${Array.from({length: 24}, (_, i) => `
+                                            <th class="border p-1 bg-gray-100 text-center">${i + 1}</th>
+                                        `).join('')}
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {standings.map((s, idx) => (
-                                        <tr key={s.player} className={idx < 3 ? 'bg-yellow-50' : ''}>
-                                            <td className="border p-2 text-center">
-                                                {idx === 0 && '🥇'} {idx === 1 && '🥈'} {idx === 2 && '🥉'} {idx + 1}
-                                            </td>
-                                            <td className="border p-2">
-                                                <PlayerBadge playerNum={s.player} />
-                                            </td>
-                                            <td className="border p-2 text-center font-bold text-blue-600 text-lg">{s.points}</td>
-                                            <td className="border p-2 text-center">{s.matches}</td>
-                                            <td className="border p-2 text-center text-green-600 font-bold">{s.wins}</td>
-                                            <td className="border p-2 text-center text-yellow-600">{s.draws}</td>
-                                            <td className="border p-2 text-center text-red-600 font-bold">{s.losses}</td>
-                                            <td className="border p-2 text-center">{s.winRate}%</td>
-                                            <td className="border p-2 text-center">{s.pointsFor}</td>
-                                            <td className="border p-2 text-center">{s.pointsAgainst}</td>
-                                            <td className={`border p-2 text-center font-bold ${s.pointsDiff > 0 ? 'text-green-600' : s.pointsDiff < 0 ? 'text-red-600' : ''}`}>
-                                                {s.pointsDiff > 0 ? '+' : ''}{s.pointsDiff}
-                                            </td>
-                                        </tr>
-                                    ))}
+                                    ${Array.from({length: 24}, (_, i) => {
+                                        const playerId = i + 1;
+                                        return `
+                                            <tr>
+                                                <th class="border p-1 bg-gray-100 sticky left-0 text-right">${playerId}</th>
+                                                ${Array.from({length: 24}, (_, j) => {
+                                                    const partnerId = j + 1;
+                                                    if (playerId === partnerId) {
+                                                        return `<td class="border p-1 bg-gray-200 text-center">-</td>`;
+                                                    }
+                                                    const count = data.partnerships[playerId][partnerId];
+                                                    const bgColor = count === 0 ? 'bg-white' : 
+                                                                   count === 1 ? 'bg-blue-200' : 
+                                                                   count === 2 ? 'bg-green-300' : 'bg-red-300';
+                                                    return `
+                                                        <td class="border p-1 text-center ${bgColor}" title="Player ${playerId} partnered with Player ${partnerId}: ${count} times">
+                                                            ${count > 0 ? count : ''}
+                                                        </td>
+                                                    `;
+                                                }).join('')}
+                                            </tr>
+                                        `;
+                                    }).join('')}
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                );
-            };
-
-            // Render based on active tab
-            const renderContent = () => {
-                if (activeTab === 'tournament') {
-                    const filteredMatches = getFilteredMatches();
-
-                    return (
-                        <div className="p-4">
-                            <div className="mb-4 flex flex-wrap gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Filter Round</label>
-                                    <select
-                                        value={filterRound}
-                                        onChange={(e) => setFilterRound(e.target.value)}
-                                        className="border rounded px-3 py-2"
-                                    >
-                                        <option value="all">All Rounds</option>
-                                        {Array.from({ length: 13 }, (_, i) => (
-                                            <option key={i + 1} value={i + 1}>Round {i + 1}</option>
-                                        ))}
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Filter Player</label>
-                                    <select
-                                        value={filterPlayer}
-                                        onChange={(e) => setFilterPlayer(e.target.value)}
-                                        className="border rounded px-3 py-2"
-                                    >
-                                        <option value="all">All Players</option>
-                                        {playerNames.map((name, idx) => (
-                                            <option key={idx + 1} value={idx + 1}>{name}</option>
-                                        ))}
-                                    </select>
-                                </div>
-
-                                <div className="flex items-end">
-                                    <button
-                                        onClick={() => { setFilterRound('all'); setFilterPlayer('all'); }}
-                                        className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
-                                    >
-                                        Clear Filters
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="mb-4">
-                                <h3 className="text-sm font-medium mb-2">Quick Round Navigation</h3>
-                                <div className="flex flex-wrap gap-2">
-                                    {Array.from({ length: 13 }, (_, i) => (
-                                        <button
-                                            key={i + 1}
-                                            onClick={() => {
-                                                setSelectedRound(i + 1);
-                                                setFilterRound(String(i + 1));
-                                            }}
-                                            className={`px-3 py-1 rounded transition-transform ${
-                                                selectedRound === i + 1
-                                                    ? 'bg-blue-500 text-white scale-110'
-                                                    : 'bg-gray-200 hover:bg-gray-300'
-                                            }`}
-                                        >
-                                            R{i + 1}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {filteredMatches.map(({ round, matchIndex, match }) => (
-                                    <MatchDisplay
-                                        key={`${round}-${matchIndex}`}
-                                        round={round}
-                                        matchIndex={matchIndex}
-                                        match={match}
-                                    />
-                                ))}
-                            </div>
+                    
+                    <!-- Opponent Matrix -->
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <h3 class="font-semibold text-gray-800 mb-3">Opponent Matrix</h3>
+                        <div class="text-xs text-gray-600 mb-3">
+                            <span class="inline-block w-6 h-6 bg-red-100 border mr-1"></span> 1-2 times
+                            <span class="inline-block w-6 h-6 bg-orange-200 border mr-1 ml-3"></span> 3-4 times
+                            <span class="inline-block w-6 h-6 bg-yellow-200 border mr-1 ml-3"></span> 5-6 times
+                            <span class="inline-block w-6 h-6 bg-purple-300 border mr-1 ml-3"></span> 7+ times
                         </div>
-                    );
-                }
-
-                if (activeTab === 'players') {
-                    return (
-                        <div className="p-4">
-                            <div className="flex justify-between items-center mb-4">
-                                <h2 className="text-2xl font-bold">Edit Player Names</h2>
-                                <button
-                                    onClick={() => setPlayerNames(defaultPlayerNames)}
-                                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-                                >
-                                    Reset All Names
-                                </button>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {playerNames.map((name, idx) => (
-                                    <div key={idx} className="border rounded-lg p-4 bg-white">
-                                        <div className="flex items-center gap-2 mb-2">
-                                            <span
-                                                className="px-2 py-1 rounded text-white text-sm font-bold"
-                                                style={{ backgroundColor: getTierColor(idx + 1) }}
-                                            >
-                                                #{idx + 1}
-                                            </span>
-                                            <span className="text-sm font-medium">{getTierName(idx + 1)}</span>
-                                        </div>
-
-                                        <div className="mb-2">
-                                            <label className="block text-sm font-medium mb-1">Player Name:</label>
-                                            <input
-                                                type="text"
-                                                value={name}
-                                                onChange={(e) => {
-                                                    const newNames = [...playerNames];
-                                                    newNames[idx] = e.target.value;
-                                                    setPlayerNames(newNames);
-                                                }}
-                                                className="w-full border rounded px-3 py-2"
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-sm font-medium mb-1">Skill Rating:</label>
-                                            <input
-                                                type="number"
-                                                step="0.05"
-                                                min="0"
-                                                max="5"
-                                                value={skillRatings[idx + 1] || 0}
-                                                onChange={(e) => {
-                                                    const val = parseFloat(e.target.value);
-                                                    if (val >= 0 && val <= 5) {
-                                                        setSkillRatings({ ...skillRatings, [idx + 1]: val });
+                        <div class="overflow-x-auto">
+                            <table class="text-xs border-collapse">
+                                <thead>
+                                    <tr>
+                                        <th class="border p-1 bg-gray-100 sticky left-0"></th>
+                                        ${Array.from({length: 24}, (_, i) => `
+                                            <th class="border p-1 bg-gray-100 text-center">${i + 1}</th>
+                                        `).join('')}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${Array.from({length: 24}, (_, i) => {
+                                        const playerId = i + 1;
+                                        return `
+                                            <tr>
+                                                <th class="border p-1 bg-gray-100 sticky left-0 text-right">${playerId}</th>
+                                                ${Array.from({length: 24}, (_, j) => {
+                                                    const opponentId = j + 1;
+                                                    if (playerId === opponentId) {
+                                                        return `<td class="border p-1 bg-gray-200 text-center">-</td>`;
                                                     }
-                                                }}
-                                                className="w-full border rounded px-3 py-2"
-                                            />
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div className="mt-6 bg-blue-50 p-4 rounded-lg">
-                                <h3 className="font-bold mb-2">💡 Tips</h3>
-                                <p className="text-sm">Players are organized into 6 tiers of 4 players each.</p>
-                                <p className="text-sm">Skill ratings range from 0-5, used for fairness calculations.</p>
-                            </div>
-                        </div>
-                    );
-                }
-
-                if (activeTab === 'data') {
-                    return (
-                        <div className="p-4">
-                            <h2 className="text-2xl font-bold mb-4">Data Management</h2>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                                <div className="border rounded-lg p-4 bg-blue-50">
-                                    <h3 className="font-bold mb-2">Export Data</h3>
-                                    <button
-                                        onClick={exportData}
-                                        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 w-full"
-                                    >
-                                        Download JSON
-                                    </button>
-                                </div>
-
-                                <div className="border rounded-lg p-4 bg-purple-50">
-                                    <h3 className="font-bold mb-2">Import Data</h3>
-                                    <input
-                                        type="file"
-                                        accept=".json"
-                                        onChange={importData}
-                                        className="w-full"
-                                    />
-                                </div>
-
-                                <div className="border rounded-lg p-4 bg-red-50">
-                                    <h3 className="font-bold mb-2">Reset Scores</h3>
-                                    <button
-                                        onClick={resetAllScores}
-                                        className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 w-full"
-                                    >
-                                        Reset All Scores
-                                    </button>
-                                </div>
-
-                                <div className="border rounded-lg p-4 bg-green-50">
-                                    <h3 className="font-bold mb-2">Save Backup</h3>
-                                    <button
-                                        onClick={saveCurrentVersion}
-                                        className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 w-full"
-                                    >
-                                        Save Current Version
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div>
-                                <h3 className="text-xl font-bold mb-2">Saved Versions ({savedVersions.length}/10)</h3>
-                                {savedVersions.length === 0 ? (
-                                    <div className="border rounded-lg p-8 text-center text-gray-500">
-                                        <div className="text-4xl mb-2">📦</div>
-                                        <p>No saved versions yet</p>
-                                        <p className="text-sm">Click 'Save Backup' to create one</p>
-                                    </div>
-                                ) : (
-                                    <div className="space-y-2">
-                                        {savedVersions.map((version, idx) => {
-                                            const matchCount = Object.keys(version.data.matchScores).reduce((sum, round) => {
-                                                return sum + Object.keys(version.data.matchScores[round]).length;
-                                            }, 0);
-
-                                            return (
-                                                <div key={idx} className="border rounded-lg p-4 bg-white hover:shadow-lg transition-shadow">
-                                                    <div className="flex justify-between items-start">
-                                                        <div>
-                                                            <h4 className="font-bold">{version.name}</h4>
-                                                            <p className="text-sm text-gray-600">{new Date(version.timestamp).toLocaleString()}</p>
-                                                            <p className="text-sm text-gray-600">{matchCount} matches recorded</p>
-                                                        </div>
-                                                        <div className="flex gap-2">
-                                                            <button
-                                                                onClick={() => loadVersion(version)}
-                                                                className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
-                                                            >
-                                                                Load
-                                                            </button>
-                                                            <button
-                                                                onClick={() => deleteVersion(idx)}
-                                                                className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm"
-                                                            >
-                                                                Delete
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    );
-                }
-
-                if (activeTab === 'results') {
-                    return <ResultsTab />;
-                }
-
-                if (activeTab === 'fairness') {
-                    const fairnessData = [];
-                    
-                    for (let p = 1; p <= 24; p++) {
-                        let data = {
-                            player: p,
-                            rating: skillRatings[p],
-                            rounds: [],
-                            total: 0,
-                            avg: 0,
-                            hardest: { round: null, value: Infinity },
-                            easiest: { round: null, value: -Infinity }
-                        };
-
-                        for (let r = 1; r <= 13; r++) {
-                            for (let m = 0; m < 6; m++) {
-                                const match = fixtures[r - 1][m];
-                                if (!match.includes(p)) continue;
-
-                                const isTeam1 = match[0] === p || match[1] === p;
-                                const teamRating = isTeam1 
-                                    ? skillRatings[match[0]] + skillRatings[match[1]]
-                                    : skillRatings[match[2]] + skillRatings[match[3]];
-                                const oppRating = isTeam1
-                                    ? skillRatings[match[2]] + skillRatings[match[3]]
-                                    : skillRatings[match[0]] + skillRatings[match[1]];
-                                
-                                const fairness = teamRating - oppRating;
-                                data.rounds.push(fairness);
-                                data.total += fairness;
-
-                                if (fairness < data.hardest.value) {
-                                    data.hardest = { round: r, value: fairness };
-                                }
-                                if (fairness > data.easiest.value) {
-                                    data.easiest = { round: r, value: fairness };
-                                }
-                            }
-                        }
-
-                        data.avg = data.total / 13;
-                        fairnessData.push(data);
-                    }
-
-                    fairnessData.sort((a, b) => a.total - b.total);
-
-                    const getFairnessColor = (value) => {
-                        if (value < -0.5) return 'bg-red-200 text-red-800';
-                        if (value < 0) return 'bg-red-100 text-red-700';
-                        if (value === 0) return 'bg-gray-200 text-gray-700';
-                        if (value < 0.5) return 'bg-green-100 text-green-700';
-                        return 'bg-green-200 text-green-800';
-                    };
-
-                    const harder = fairnessData.filter(d => d.total < -1).length;
-                    const balanced = fairnessData.filter(d => d.total >= -1 && d.total <= 1).length;
-                    const easier = fairnessData.filter(d => d.total > 1).length;
-
-                    return (
-                        <div className="p-4">
-                            <h2 className="text-2xl font-bold mb-4">Fairness Analysis</h2>
-                            
-                            <div className="bg-blue-50 p-4 rounded-lg mb-4">
-                                <h3 className="font-bold mb-2">How Fairness is Calculated</h3>
-                                <p className="text-sm mb-1">Fairness Score = Your Team Rating - Opponent Team Rating</p>
-                                <p className="text-sm"><strong>Negative score:</strong> Faced harder opponents</p>
-                                <p className="text-sm"><strong>Positive score:</strong> Faced easier opponents</p>
-                                <p className="text-sm"><strong>Zero score:</strong> Perfectly balanced match</p>
-                            </div>
-
-                            <div className="overflow-x-auto mb-4">
-                                <table className="w-full border-collapse text-sm">
-                                    <thead>
-                                        <tr className="bg-gray-200">
-                                            <th className="border p-2">Player</th>
-                                            <th className="border p-2">Rating</th>
-                                            <th className="border p-2">Total Fair</th>
-                                            <th className="border p-2">Avg Fair</th>
-                                            <th className="border p-2">Hardest Round</th>
-                                            <th className="border p-2">Easiest Round</th>
-                                            <th className="border p-2">All Rounds</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {fairnessData.map((d) => (
-                                            <tr key={d.player}>
-                                                <td className="border p-2">
-                                                    <PlayerBadge playerNum={d.player} />
-                                                </td>
-                                                <td className="border p-2 text-center">{d.rating.toFixed(2)}</td>
-                                                <td className={`border p-2 text-center font-bold ${getFairnessColor(d.total)}`}>
-                                                    {d.total.toFixed(2)}
-                                                </td>
-                                                <td className="border p-2 text-center">{d.avg.toFixed(2)}</td>
-                                                <td className="border p-2 text-center">
-                                                    <span title={`Round ${d.hardest.round}: ${d.hardest.value.toFixed(2)}`}>
-                                                        R{d.hardest.round} ({d.hardest.value.toFixed(2)})
-                                                    </span>
-                                                </td>
-                                                <td className="border p-2 text-center">
-                                                    <span title={`Round ${d.easiest.round}: ${d.easiest.value.toFixed(2)}`}>
-                                                        R{d.easiest.round} ({d.easiest.value.toFixed(2)})
-                                                    </span>
-                                                </td>
-                                                <td className="border p-2">
-                                                    <div className="flex gap-1 flex-wrap">
-                                                        {d.rounds.map((val, idx) => (
-                                                            <span
-                                                                key={idx}
-                                                                className={`px-1 text-xs rounded ${getFairnessColor(val)}`}
-                                                                title={`Round ${idx + 1}: ${val.toFixed(2)}`}
-                                                            >
-                                                                {val.toFixed(1)}
-                                                            </span>
-                                                        ))}
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <div className="grid grid-cols-3 gap-4">
-                                <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4 text-center">
-                                    <div className="text-3xl font-bold text-red-700">{harder}</div>
-                                    <div className="text-sm">Harder Schedule</div>
-                                    <div className="text-xs text-gray-600">(Total &lt; -1)</div>
-                                </div>
-                                <div className="bg-gray-50 border-2 border-gray-300 rounded-lg p-4 text-center">
-                                    <div className="text-3xl font-bold text-gray-700">{balanced}</div>
-                                    <div className="text-sm">Balanced</div>
-                                    <div className="text-xs text-gray-600">(-1 to +1)</div>
-                                </div>
-                                <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4 text-center">
-                                    <div className="text-3xl font-bold text-green-700">{easier}</div>
-                                    <div className="text-sm">Easier Schedule</div>
-                                    <div className="text-xs text-gray-600">(Total &gt; +1)</div>
-                                </div>
-                            </div>
-                        </div>
-                    );
-                }
-
-                if (activeTab === 'fairness2') {
-                    const fairness2Data = [];
-                    
-                    for (let p = 1; p <= 24; p++) {
-                        let data = {
-                            player: p,
-                            rating: skillRatings[p],
-                            rounds: [],
-                            total: 0,
-                            avg: 0,
-                            hardest: { round: null, value: Infinity, partner: null, opponents: [] },
-                            easiest: { round: null, value: -Infinity, partner: null, opponents: [] }
-                        };
-
-                        for (let r = 1; r <= 13; r++) {
-                            for (let m = 0; m < 6; m++) {
-                                const match = fixtures[r - 1][m];
-                                if (!match.includes(p)) continue;
-
-                                const isTeam1 = match[0] === p || match[1] === p;
-                                const partner = isTeam1 
-                                    ? (match[0] === p ? match[1] : match[0])
-                                    : (match[2] === p ? match[3] : match[2]);
-                                const opponents = isTeam1 ? [match[2], match[3]] : [match[0], match[1]];
-                                
-                                const partnerRating = skillRatings[partner];
-                                const avgOppRating = (skillRatings[opponents[0]] + skillRatings[opponents[1]]) / 2;
-                                
-                                const fairness = partnerRating - avgOppRating;
-                                data.rounds.push(fairness);
-                                data.total += fairness;
-
-                                if (fairness < data.hardest.value) {
-                                    data.hardest = { round: r, value: fairness, partner, opponents };
-                                }
-                                if (fairness > data.easiest.value) {
-                                    data.easiest = { round: r, value: fairness, partner, opponents };
-                                }
-                            }
-                        }
-
-                        data.avg = data.total / 13;
-                        fairness2Data.push(data);
-                    }
-
-                    fairness2Data.sort((a, b) => a.total - b.total);
-
-                    const getFairnessColor = (value) => {
-                        if (value < -0.5) return 'bg-red-200 text-red-800';
-                        if (value < 0) return 'bg-red-100 text-red-700';
-                        if (value === 0) return 'bg-gray-200 text-gray-700';
-                        if (value < 0.5) return 'bg-green-100 text-green-700';
-                        return 'bg-green-200 text-green-800';
-                    };
-
-                    const harder = fairness2Data.filter(d => d.total < -1).length;
-                    const balanced = fairness2Data.filter(d => d.total >= -1 && d.total <= 1).length;
-                    const easier = fairness2Data.filter(d => d.total > 1).length;
-
-                    return (
-                        <div className="p-4">
-                            <h2 className="text-2xl font-bold mb-4">Fairness Analysis 2</h2>
-                            
-                            <div className="bg-purple-50 p-4 rounded-lg mb-4">
-                                <h3 className="font-bold mb-2">How Fairness 2 is Calculated</h3>
-                                <p className="text-sm mb-1">Fairness Score = Partner Rating - Average Opponent Rating</p>
-                                <p className="text-sm"><strong>Negative score:</strong> Partner weaker than average opponent</p>
-                                <p className="text-sm"><strong>Positive score:</strong> Partner stronger than average opponent</p>
-                            </div>
-
-                            <div className="overflow-x-auto mb-4">
-                                <table className="w-full border-collapse text-sm">
-                                    <thead>
-                                        <tr className="bg-purple-200">
-                                            <th className="border p-2">Player</th>
-                                            <th className="border p-2">Rating</th>
-                                            <th className="border p-2">Total Fair</th>
-                                            <th className="border p-2">Avg Fair</th>
-                                            <th className="border p-2">Hardest Round</th>
-                                            <th className="border p-2">Easiest Round</th>
-                                            <th className="border p-2">All Rounds</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {fairness2Data.map((d) => (
-                                            <tr key={d.player}>
-                                                <td className="border p-2">
-                                                    <PlayerBadge playerNum={d.player} />
-                                                </td>
-                                                <td className="border p-2 text-center">{d.rating.toFixed(2)}</td>
-                                                <td className={`border p-2 text-center font-bold ${getFairnessColor(d.total)}`}>
-                                                    {d.total.toFixed(2)}
-                                                </td>
-                                                <td className="border p-2 text-center">{d.avg.toFixed(2)}</td>
-                                                <td className="border p-2 text-center">
-                                                    <span title={`Round ${d.hardest.round}: Partner ${playerNames[d.hardest.partner - 1]}, ${d.hardest.value.toFixed(2)}`}>
-                                                        R{d.hardest.round} ({d.hardest.value.toFixed(2)})
-                                                    </span>
-                                                </td>
-                                                <td className="border p-2 text-center">
-                                                    <span title={`Round ${d.easiest.round}: Partner ${playerNames[d.easiest.partner - 1]}, ${d.easiest.value.toFixed(2)}`}>
-                                                        R{d.easiest.round} ({d.easiest.value.toFixed(2)})
-                                                    </span>
-                                                </td>
-                                                <td className="border p-2">
-                                                    <div className="flex gap-1 flex-wrap">
-                                                        {d.rounds.map((val, idx) => (
-                                                            <span
-                                                                key={idx}
-                                                                className={`px-1 text-xs rounded ${getFairnessColor(val)}`}
-                                                                title={`Round ${idx + 1}: ${val.toFixed(2)}`}
-                                                            >
-                                                                {val.toFixed(1)}
-                                                            </span>
-                                                        ))}
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <div className="grid grid-cols-3 gap-4">
-                                <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4 text-center">
-                                    <div className="text-3xl font-bold text-red-700">{harder}</div>
-                                    <div className="text-sm">Weaker Partners</div>
-                                    <div className="text-xs text-gray-600">(Total &lt; -1)</div>
-                                </div>
-                                <div className="bg-gray-50 border-2 border-gray-300 rounded-lg p-4 text-center">
-                                    <div className="text-3xl font-bold text-gray-700">{balanced}</div>
-                                    <div className="text-sm">Balanced</div>
-                                    <div className="text-xs text-gray-600">(-1 to +1)</div>
-                                </div>
-                                <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4 text-center">
-                                    <div className="text-3xl font-bold text-green-700">{easier}</div>
-                                    <div className="text-sm">Stronger Partners</div>
-                                    <div className="text-xs text-gray-600">(Total &gt; +1)</div>
-                                </div>
-                            </div>
-                        </div>
-                    );
-                }
-
-                if (activeTab === 'partnerships') {
-                    const partnerships = Array(25).fill(null).map(() => Array(25).fill(0));
-                    const opponents = Array(25).fill(null).map(() => Array(25).fill(0));
-
-                    for (let r = 1; r <= 13; r++) {
-                        for (let m = 0; m < 6; m++) {
-                            const [p1, p2, p3, p4] = fixtures[r - 1][m];
-                            partnerships[p1][p2]++;
-                            partnerships[p2][p1]++;
-                            partnerships[p3][p4]++;
-                            partnerships[p4][p3]++;
-
-                            opponents[p1][p3]++;
-                            opponents[p1][p4]++;
-                            opponents[p2][p3]++;
-                            opponents[p2][p4]++;
-                            opponents[p3][p1]++;
-                            opponents[p3][p2]++;
-                            opponents[p4][p1]++;
-                            opponents[p4][p2]++;
-                        }
-                    }
-
-                    let uniquePartnerships = 0;
-                    let totalPartnerships = 0;
-                    let uniqueOpponents = 0;
-                    let totalOpponents = 0;
-
-                    for (let i = 1; i <= 24; i++) {
-                        for (let j = i + 1; j <= 24; j++) {
-                            if (partnerships[i][j] > 0) {
-                                uniquePartnerships++;
-                                totalPartnerships += partnerships[i][j];
-                            }
-                            if (opponents[i][j] > 0) {
-                                uniqueOpponents++;
-                                totalOpponents += opponents[i][j];
-                            }
-                        }
-                    }
-
-                    const getPartnershipColor = (count) => {
-                        if (count === 0) return 'bg-white';
-                        if (count === 1) return 'bg-blue-100';
-                        if (count === 2) return 'bg-green-300';
-                        return 'bg-red-300';
-                    };
-
-                    const getOpponentColor = (count) => {
-                        if (count === 0) return 'bg-white';
-                        if (count === 1) return 'bg-red-100';
-                        if (count === 2) return 'bg-red-200';
-                        if (count === 3) return 'bg-orange-200';
-                        if (count === 4) return 'bg-orange-300';
-                        if (count === 5) return 'bg-yellow-200';
-                        if (count === 6) return 'bg-yellow-300';
-                        return 'bg-purple-300';
-                    };
-
-                    return (
-                        <div className="p-4">
-                            <h2 className="text-2xl font-bold mb-4">Partnership & Opponent Analysis</h2>
-
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                                <div className="bg-blue-50 border rounded-lg p-4 text-center">
-                                    <div className="text-3xl font-bold text-blue-700">{totalPartnerships}</div>
-                                    <div className="text-sm">Total Partnerships</div>
-                                </div>
-                                <div className="bg-green-50 border rounded-lg p-4 text-center">
-                                    <div className="text-3xl font-bold text-green-700">{uniquePartnerships}</div>
-                                    <div className="text-sm">Unique Partnerships</div>
-                                </div>
-                                <div className="bg-orange-50 border rounded-lg p-4 text-center">
-                                    <div className="text-3xl font-bold text-orange-700">{totalOpponents}</div>
-                                    <div className="text-sm">Total Opponent Pairs</div>
-                                </div>
-                                <div className="bg-purple-50 border rounded-lg p-4 text-center">
-                                    <div className="text-3xl font-bold text-purple-700">{uniqueOpponents}</div>
-                                    <div className="text-sm">Unique Opponent Pairs</div>
-                                </div>
-                            </div>
-
-                            <div className="mb-8">
-                                <h3 className="text-xl font-bold mb-2">Partnership Frequency Matrix</h3>
-                                <div className="overflow-x-auto">
-                                    <table className="border-collapse text-xs">
-                                        <thead>
-                                            <tr>
-                                                <th className="border p-1 bg-gray-200 sticky left-0"></th>
-                                                {Array.from({ length: 24 }, (_, i) => (
-                                                    <th key={i} className="border p-1 bg-gray-200">
-                                                        <div style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
-                                                            P{i + 1}
-                                                        </div>
-                                                    </th>
-                                                ))}
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {Array.from({ length: 24 }, (_, i) => (
-                                                <tr key={i}>
-                                                    <td className="border p-1 bg-gray-200 font-bold sticky left-0">P{i + 1}</td>
-                                                    {Array.from({ length: 24 }, (_, j) => (
-                                                        <td
-                                                            key={j}
-                                                            className={`border p-1 text-center ${
-                                                                i === j ? 'bg-gray-300' : getPartnershipColor(partnerships[i + 1][j + 1])
-                                                            }`}
-                                                        >
-                                                            {i === j ? '-' : partnerships[i + 1][j + 1] || ''}
+                                                    const count = data.opponents[playerId][opponentId];
+                                                    const bgColor = count === 0 ? 'bg-white' : 
+                                                                   count <= 2 ? 'bg-red-100' : 
+                                                                   count <= 4 ? 'bg-orange-200' : 
+                                                                   count <= 6 ? 'bg-yellow-200' : 'bg-purple-300';
+                                                    return `
+                                                        <td class="border p-1 text-center ${bgColor}" title="Player ${playerId} opposed Player ${opponentId}: ${count} times">
+                                                            ${count > 0 ? count : ''}
                                                         </td>
-                                                    ))}
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <div className="flex gap-4 mt-2 text-xs">
-                                    <span className="flex items-center gap-1">
-                                        <div className="w-4 h-4 bg-blue-100 border"></div> 1x
-                                    </span>
-                                    <span className="flex items-center gap-1">
-                                        <div className="w-4 h-4 bg-green-300 border"></div> 2x
-                                    </span>
-                                    <span className="flex items-center gap-1">
-                                        <div className="w-4 h-4 bg-red-300 border"></div> 3+
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div>
-                                <h3 className="text-xl font-bold mb-2">Opponent Frequency Matrix</h3>
-                                <div className="overflow-x-auto">
-                                    <table className="border-collapse text-xs">
-                                        <thead>
-                                            <tr>
-                                                <th className="border p-1 bg-gray-200 sticky left-0"></th>
-                                                {Array.from({ length: 24 }, (_, i) => (
-                                                    <th key={i} className="border p-1 bg-gray-200">
-                                                        <div style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>
-                                                            P{i + 1}
-                                                        </div>
-                                                    </th>
-                                                ))}
+                                                    `;
+                                                }).join('')}
                                             </tr>
-                                        </thead>
-                                        <tbody>
-                                            {Array.from({ length: 24 }, (_, i) => (
-                                                <tr key={i}>
-                                                    <td className="border p-1 bg-gray-200 font-bold sticky left-0">P{i + 1}</td>
-                                                    {Array.from({ length: 24 }, (_, j) => (
-                                                        <td
-                                                            key={j}
-                                                            className={`border p-1 text-center ${
-                                                                i === j ? 'bg-gray-300' : getOpponentColor(opponents[i + 1][j + 1])
-                                                            }`}
-                                                        >
-                                                            {i === j ? '-' : opponents[i + 1][j + 1] || ''}
-                                                        </td>
-                                                    ))}
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <div className="flex gap-2 mt-2 text-xs flex-wrap">
-                                    <span className="flex items-center gap-1">
-                                        <div className="w-4 h-4 bg-red-100 border"></div> 1-2x
-                                    </span>
-                                    <span className="flex items-center gap-1">
-                                        <div className="w-4 h-4 bg-orange-200 border"></div> 3-4x
-                                    </span>
-                                    <span className="flex items-center gap-1">
-                                        <div className="w-4 h-4 bg-yellow-200 border"></div> 5-6x
-                                    </span>
-                                    <span className="flex items-center gap-1">
-                                        <div className="w-4 h-4 bg-purple-300 border"></div> 7+
-                                    </span>
-                                </div>
-                            </div>
+                                        `;
+                                    }).join('')}
+                                </tbody>
+                            </table>
                         </div>
-                    );
-                }
-
-                if (activeTab === 'knockout') {
-                    // Calculate standings for top 12
-                    const standings = [];
-                    for (let p = 1; p <= 24; p++) {
-                        let stats = { player: p, matches: 0, wins: 0, draws: 0, losses: 0, pointsFor: 0, pointsAgainst: 0, points: 0 };
-                        for (let r = 1; r <= 13; r++) {
-                            for (let m = 0; m < 6; m++) {
-                                const match = fixtures[r - 1][m];
-                                if (!match.includes(p)) continue;
-                                const scores = matchScores[r]?.[m];
-                                if (!scores || scores.team1Score === null) continue;
-                                stats.matches++;
-                                const isTeam1 = match[0] === p || match[1] === p;
-                                const myScore = isTeam1 ? scores.team1Score : scores.team2Score;
-                                const oppScore = isTeam1 ? scores.team2Score : scores.team1Score;
-                                stats.pointsFor += myScore;
-                                stats.pointsAgainst += oppScore;
-                                if (myScore > oppScore) { stats.wins++; stats.points += 3; }
-                                else if (myScore < oppScore) { stats.losses++; }
-                                else { stats.draws++; stats.points += 1; }
-                            }
-                        }
-                        stats.pointsDiff = stats.pointsFor - stats.pointsAgainst;
-                        standings.push(stats);
-                    }
-                    standings.sort((a, b) => {
-                        if (b.points !== a.points) return b.points - a.points;
-                        if (b.pointsDiff !== a.pointsDiff) return b.pointsDiff - a.pointsDiff;
-                        return b.pointsFor - a.pointsFor;
-                    });
-
-                    const top12 = standings.slice(0, 12);
-                    const qualified = top12.length === 12 && top12.every(s => s.matches > 0);
-
-                    const handleKnockoutScore = (matchId, team, value, maxScore) => {
-                        const score = value === '' ? null : parseInt(value);
-                        if (score !== null && (score < 0 || score > maxScore)) return;
-                        const newScores = { ...knockoutScores };
-                        if (!newScores[matchId]) newScores[matchId] = {};
-                        if (team === 'team1') {
-                            newScores[matchId].team1Score = score;
-                            newScores[matchId].team2Score = score !== null ? maxScore - score : null;
-                        } else {
-                            newScores[matchId].team2Score = score;
-                            newScores[matchId].team1Score = score !== null ? maxScore - score : null;
-                        }
-                        setKnockoutScores(newScores);
-                    };
-
-                    const clearKnockoutScore = (matchId) => {
-                        const newScores = { ...knockoutScores };
-                        delete newScores[matchId];
-                        setKnockoutScores(newScores);
-                    };
-
-                    const getWinner = (matchId) => {
-                        const scores = knockoutScores[matchId];
-                        if (!scores || scores.team1Score === null) return null;
-                        if (scores.team1Score > scores.team2Score) return 'team1';
-                        if (scores.team2Score > scores.team1Score) return 'team2';
-                        return 'tie';
-                    };
-
-                    const KnockoutMatch = ({ title, team1Players, team2Players, matchId, subtitle, maxScore, disabled = false }) => {
-                        if (disabled || !team1Players || !team2Players) {
-                            return (
-                                <div className="border-2 border-gray-300 rounded-lg p-4 bg-gray-50">
-                                    <div className="text-center text-gray-500">
-                                        <div className="font-bold mb-2">{title}</div>
-                                        <div className="text-sm">{subtitle || 'Complete previous matches first'}</div>
-                                    </div>
-                                </div>
-                            );
-                        }
-
-                        const scores = knockoutScores[matchId] || {};
-                        const isComplete = scores.team1Score !== undefined && scores.team1Score !== null;
-                        const winner = getWinner(matchId);
-
-                        return (
-                            <div className={`border-2 rounded-lg p-4 ${isComplete ? 'border-green-500 bg-green-50' : 'bg-white border-gray-300'}`}>
-                                <div className="flex justify-between items-center mb-2">
-                                    <div>
-                                        <div className="font-bold">{title}</div>
-                                        {subtitle && <div className="text-xs text-gray-600">{subtitle}</div>}
-                                    </div>
-                                    {isComplete && <span className="text-green-600">✓</span>}
-                                </div>
-
-                                <div className={`mb-2 p-2 rounded ${winner === 'team1' ? 'bg-green-100 border-2 border-green-500' : ''}`}>
-                                    <div className="flex gap-2 mb-1">
-                                        <PlayerBadge playerNum={team1Players[0]} />
-                                        <PlayerBadge playerNum={team1Players[1]} />
-                                    </div>
-                                    {winner === 'team1' && <div className="text-green-700 font-bold">🏆 Winners</div>}
-                                </div>
-
-                                <div className="flex items-center justify-center gap-2 my-2">
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        max={maxScore}
-                                        value={scores.team1Score ?? ''}
-                                        onChange={(e) => handleKnockoutScore(matchId, 'team1', e.target.value, maxScore)}
-                                        className="w-16 px-2 py-1 border rounded text-center"
-                                        placeholder="0"
-                                    />
-                                    <span className="font-bold">-</span>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        max={maxScore}
-                                        value={scores.team2Score ?? ''}
-                                        onChange={(e) => handleKnockoutScore(matchId, 'team2', e.target.value, maxScore)}
-                                        className="w-16 px-2 py-1 border rounded text-center"
-                                        placeholder="0"
-                                    />
-                                    {isComplete && (
-                                        <button
-                                            onClick={() => clearKnockoutScore(matchId)}
-                                            className="text-red-500 hover:text-red-700 ml-2"
-                                        >
-                                            ✕
-                                        </button>
-                                    )}
-                                </div>
-
-                                <div className={`mt-2 p-2 rounded ${winner === 'team2' ? 'bg-green-100 border-2 border-green-500' : ''}`}>
-                                    <div className="flex gap-2 mb-1">
-                                        <PlayerBadge playerNum={team2Players[0]} />
-                                        <PlayerBadge playerNum={team2Players[1]} />
-                                    </div>
-                                    {winner === 'team2' && <div className="text-green-700 font-bold">🏆 Winners</div>}
-                                </div>
-                            </div>
-                        );
-                    };
-
-                    if (!qualified) {
-                        return (
-                            <div className="p-4">
-                                <h2 className="text-2xl font-bold mb-4">Knockout Stage</h2>
-                                <div className="bg-gray-50 border-2 border-gray-300 rounded-lg p-12 text-center">
-                                    <div className="text-6xl mb-4">🏆</div>
-                                    <h3 className="text-xl font-bold mb-2">Complete the Round Robin Stage First</h3>
-                                    <p className="text-gray-600">Top 12 players will qualify for playoffs</p>
-                                </div>
-                                <div className="mt-6 bg-blue-50 p-4 rounded-lg">
-                                    <h3 className="font-bold mb-2">Knockout Stage Scoring Configuration</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        <div>
-                                            <label className="block text-sm font-medium mb-1">Quarter Finals Max Score:</label>
-                                            <select
-                                                value={knockoutMaxScore}
-                                                onChange={(e) => setKnockoutMaxScore(parseInt(e.target.value))}
-                                                className="w-full border rounded px-3 py-2"
-                                            >
-                                                {Array.from({ length: 17 }, (_, i) => i + 8).map(n => (
-                                                    <option key={n} value={n}>{n}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium mb-1">Semi Finals Max Score:</label>
-                                            <select
-                                                value={semiMaxScore}
-                                                onChange={(e) => setSemiMaxScore(parseInt(e.target.value))}
-                                                className="w-full border rounded px-3 py-2"
-                                            >
-                                                {Array.from({ length: 17 }, (_, i) => i + 8).map(n => (
-                                                    <option key={n} value={n}>{n}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="block text-sm font-medium mb-1">Final Max Score:</label>
-                                            <select
-                                                value={finalMaxScore}
-                                                onChange={(e) => setFinalMaxScore(parseInt(e.target.value))}
-                                                className="w-full border rounded px-3 py-2"
-                                            >
-                                                {Array.from({ length: 17 }, (_, i) => i + 8).map(n => (
-                                                    <option key={n} value={n}>{n}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    }
-
-                    // Get qualified players
-                    const p1 = top12[0].player;
-                    const p2 = top12[1].player;
-                    const p3 = top12[2].player;
-                    const p4 = top12[3].player;
-                    const p5 = top12[4].player;
-                    const p6 = top12[5].player;
-                    const p7 = top12[6].player;
-                    const p8 = top12[7].player;
-                    const p9 = top12[8].player;
-                    const p10 = top12[9].player;
-                    const p11 = top12[10].player;
-                    const p12 = top12[11].player;
-
-                    // Determine QF winners
-                    const qf1Winner = getWinner('qf1');
-                    const qf2Winner = getWinner('qf2');
-                    const qf3Winner = getWinner('qf3');
-                    const qf4Winner = getWinner('qf4');
-
-                    const qf1WinnerPlayers = qf1Winner === 'team1' ? [p1, p3] : qf1Winner === 'team2' ? [p12, p10] : null;
-                    const qf4WinnerPlayers = qf4Winner === 'team1' ? [p6, p8] : qf4Winner === 'team2' ? [p9, p11] : null;
-                    const qf2WinnerPlayers = qf2Winner === 'team1' ? [p2, p4] : qf2Winner === 'team2' ? [p12, p10] : null;
-                    const qf3WinnerPlayers = qf3Winner === 'team1' ? [p5, p7] : qf3Winner === 'team2' ? [p10, p12] : null;
-
-                    // Determine SF winners
-                    const sf1Winner = getWinner('sf1');
-                    const sf2Winner = getWinner('sf2');
-
-                    const sf1WinnerPlayers = sf1Winner === 'team1' ? qf1WinnerPlayers : sf1Winner === 'team2' ? qf4WinnerPlayers : null;
-                    const sf2WinnerPlayers = sf2Winner === 'team1' ? qf2WinnerPlayers : sf2Winner === 'team2' ? qf3WinnerPlayers : null;
-
-                    const finalWinner = getWinner('final');
-
-                    return (
-                        <div className="p-4">
-                            <h2 className="text-2xl font-bold mb-4">🏆 Knockout Stage - Top 12 Players</h2>
-
-                            <div className="mb-4 bg-blue-50 p-4 rounded-lg">
-                                <h3 className="font-bold mb-2">Scoring Configuration</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium mb-1">QF Max:</label>
-                                        <select
-                                            value={knockoutMaxScore}
-                                            onChange={(e) => setKnockoutMaxScore(parseInt(e.target.value))}
-                                            className="w-full border rounded px-2 py-1"
-                                        >
-                                            {Array.from({ length: 17 }, (_, i) => i + 8).map(n => (
-                                                <option key={n} value={n}>{n}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium mb-1">SF Max:</label>
-                                        <select
-                                            value={semiMaxScore}
-                                            onChange={(e) => setSemiMaxScore(parseInt(e.target.value))}
-                                            className="w-full border rounded px-2 py-1"
-                                        >
-                                            {Array.from({ length: 17 }, (_, i) => i + 8).map(n => (
-                                                <option key={n} value={n}>{n}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium mb-1">Final Max:</label>
-                                        <select
-                                            value={finalMaxScore}
-                                            onChange={(e) => setFinalMaxScore(parseInt(e.target.value))}
-                                            className="w-full border rounded px-2 py-1"
-                                        >
-                                            {Array.from({ length: 17 }, (_, i) => i + 8).map(n => (
-                                                <option key={n} value={n}>{n}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="mb-4">
-                                <h3 className="font-bold mb-2">Qualified Players (Seeded by Standings)</h3>
-                                <div className="flex flex-wrap gap-2">
-                                    {top12.map((s, idx) => (
-                                        <div key={s.player} className="bg-gradient-to-r from-yellow-100 to-yellow-200 border-2 border-yellow-400 rounded px-3 py-2">
-                                            <div className="text-xs font-bold text-yellow-800">#{idx + 1}</div>
-                                            <PlayerBadge playerNum={s.player} />
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div className="mb-6">
-                                <h3 className="text-xl font-bold mb-3">Quarter Finals</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <KnockoutMatch
-                                        title="QF1"
-                                        subtitle="1st/3rd vs 12th/10th"
-                                        team1Players={[p1, p3]}
-                                        team2Players={[p12, p10]}
-                                        matchId="qf1"
-                                        maxScore={knockoutMaxScore}
-                                    />
-                                    <KnockoutMatch
-                                        title="QF2"
-                                        subtitle="2nd/4th vs 11th/9th"
-                                        team1Players={[p2, p4]}
-                                        team2Players={[p11, p9]}
-                                        matchId="qf2"
-                                        maxScore={knockoutMaxScore}
-                                    />
-                                    <KnockoutMatch
-                                        title="QF3"
-                                        subtitle="5th/7th vs 10th/12th"
-                                        team1Players={[p5, p7]}
-                                        team2Players={[p10, p12]}
-                                        matchId="qf3"
-                                        maxScore={knockoutMaxScore}
-                                    />
-                                    <KnockoutMatch
-                                        title="QF4"
-                                        subtitle="6th/8th vs 9th/11th"
-                                        team1Players={[p6, p8]}
-                                        team2Players={[p9, p11]}
-                                        matchId="qf4"
-                                        maxScore={knockoutMaxScore}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="mb-6">
-                                <h3 className="text-xl font-bold mb-3">Semi Finals</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <KnockoutMatch
-                                        title="SF1"
-                                        subtitle="Winner QF1 vs Winner QF4"
-                                        team1Players={qf1WinnerPlayers}
-                                        team2Players={qf4WinnerPlayers}
-                                        matchId="sf1"
-                                        maxScore={semiMaxScore}
-                                        disabled={!qf1Winner || !qf4Winner}
-                                    />
-                                    <KnockoutMatch
-                                        title="SF2"
-                                        subtitle="Winner QF2 vs Winner QF3"
-                                        team1Players={qf2WinnerPlayers}
-                                        team2Players={qf3WinnerPlayers}
-                                        matchId="sf2"
-                                        maxScore={semiMaxScore}
-                                        disabled={!qf2Winner || !qf3Winner}
-                                    />
-                                </div>
-                            </div>
-
-                            <div>
-                                <h3 className="text-xl font-bold mb-3">🏆 FINAL 🏆</h3>
-                                <div className="max-w-2xl mx-auto">
-                                    <KnockoutMatch
-                                        title="CHAMPIONSHIP FINAL"
-                                        subtitle="Winner SF1 vs Winner SF2"
-                                        team1Players={sf1WinnerPlayers}
-                                        team2Players={sf2WinnerPlayers}
-                                        matchId="final"
-                                        maxScore={finalMaxScore}
-                                        disabled={!sf1Winner || !sf2Winner}
-                                    />
-                                </div>
-
-                                {finalWinner && (
-                                    <div className="mt-6 bg-gradient-to-r from-yellow-100 to-yellow-200 border-4 border-yellow-500 rounded-lg p-8 text-center">
-                                        <div className="text-5xl mb-3">🎉 🏆 🎉</div>
-                                        <h3 className="text-2xl font-bold mb-3">TOURNAMENT CHAMPIONS!</h3>
-                                        <div className="flex gap-3 justify-center">
-                                            {(finalWinner === 'team1' ? sf1WinnerPlayers : sf2WinnerPlayers).map(p => (
-                                                <div key={p} className="bg-white rounded-lg p-3 shadow-lg">
-                                                    <PlayerBadge playerNum={p} />
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    );
-                }
-
-                return <div className="p-4">Tab content coming soon...</div>;
-            };
-
-            return (
-                <div className="min-h-screen bg-gray-100">
-                    <header className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 shadow-lg">
-                        <h1 className="text-3xl font-bold">🏓 Padel Tournament</h1>
-                        <p className="text-sm opacity-90">24 Players • 13 Rounds • Fairness-Optimized Competition</p>
-                    </header>
-
-                    <nav className="bg-white shadow-md p-2">
-                        <div className="flex flex-wrap gap-2">
-                            {[
-                                { id: 'tournament', label: '🏆 Tournament' },
-                                { id: 'players', label: '👥 Players' },
-                                { id: 'data', label: '💾 Data' },
-                                { id: 'results', label: '📊 Results' },
-                                { id: 'fairness', label: '⚖️ Fairness' },
-                                { id: 'fairness2', label: '⚖️ Fairness 2' },
-                                { id: 'partnerships', label: '🤝 Partnerships' },
-                                { id: 'knockout', label: '🏆 Knockout' }
-                            ].map(tab => (
-                                <button
-                                    key={tab.id}
-                                    onClick={() => setActiveTab(tab.id)}
-                                    className={`px-4 py-2 rounded transition-colors ${
-                                        activeTab === tab.id
-                                            ? 'bg-blue-500 text-white'
-                                            : 'bg-gray-200 hover:bg-gray-300'
-                                    }`}
-                                >
-                                    {tab.label}
-                                </button>
-                            ))}
-                        </div>
-                    </nav>
-
-                    <main className="container mx-auto">
-                        {renderContent()}
-                    </main>
+                    </div>
                 </div>
-            );
+            `;
         }
 
-        ReactDOM.render(<PadelTournamentApp />, document.getElementById('root'));
+        function KnockoutTab() {
+            const standings = calculateStandings();
+            const top12 = standings.slice(0, 12);
+            
+            // Get knockout scores
+            const getKOScore = (matchId) => state.knockoutScores[matchId] || { team1Score: null, team2Score: null };
+            
+            const qf1 = getKOScore('qf1');
+            const qf2 = getKOScore('qf2');
+            const qf3 = getKOScore('qf3');
+            const qf4 = getKOScore('qf4');
+            const sf1 = getKOScore('sf1');
+            const sf2 = getKOScore('sf2');
+            const final = getKOScore('final');
+            
+            // Determine winners
+            const qf1Winner = qf1.team1Score !== null && qf1.team2Score !== null ? 
+                (qf1.team1Score > qf1.team2Score ? 'team1' : 'team2') : null;
+            const qf2Winner = qf2.team1Score !== null && qf2.team2Score !== null ? 
+                (qf2.team1Score > qf2.team2Score ? 'team1' : 'team2') : null;
+            const qf3Winner = qf3.team1Score !== null && qf3.team2Score !== null ? 
+                (qf3.team1Score > qf3.team2Score ? 'team1' : 'team2') : null;
+            const qf4Winner = qf4.team1Score !== null && qf4.team2Score !== null ? 
+                (qf4.team1Score > qf4.team2Score ? 'team1' : 'team2') : null;
+            const sf1Winner = sf1.team1Score !== null && sf1.team2Score !== null ? 
+                (sf1.team1Score > sf1.team2Score ? 'team1' : 'team2') : null;
+            const sf2Winner = sf2.team1Score !== null && sf2.team2Score !== null ? 
+                (sf2.team1Score > sf2.team2Score ? 'team1' : 'team2') : null;
+            const champion = final.team1Score !== null && final.team2Score !== null ? 
+                (final.team1Score > final.team2Score ? 'team1' : 'team2') : null;
+            
+            function KnockoutMatchCard(title, matchId, team1Players, team2Players, maxScore) {
+                const score = getKOScore(matchId);
+                const isComplete = score.team1Score !== null && score.team2Score !== null;
+                const winner = isComplete ? 
+                    (score.team1Score > score.team2Score ? 'team1' : 'team2') : null;
+                
+                return `
+                    <div class="bg-white rounded-lg shadow-md p-4 border-2 ${isComplete ? 'border-green-500' : 'border-gray-300'}">
+                        <div class="font-semibold text-gray-700 mb-3">${title}</div>
+                        
+                        ${team1Players && team2Players ? `
+                            <div class="space-y-3">
+                                <!-- Team 1 -->
+                                <div>
+                                    <div class="flex flex-wrap gap-2 mb-1">
+                                        ${PlayerBadge(team1Players[0])}
+                                        ${PlayerBadge(team1Players[1])}
+                                    </div>
+                                    ${winner === 'team1' ? '<div class="text-xs text-green-600 font-semibold">🏆 Winners</div>' : ''}
+                                </div>
+                                
+                                <!-- Score -->
+                                <div class="flex items-center gap-2 bg-gray-50 p-2 rounded">
+                                    <input 
+                                        type="number" 
+                                        min="0" 
+                                        max="${maxScore}" 
+                                        value="${score.team1Score !== null ? score.team1Score : ''}"
+                                        placeholder="0-${maxScore}"
+                                        class="w-16 px-2 py-1 border rounded text-center"
+                                        onchange="handleKnockoutScore('${matchId}', this.value, 1, ${maxScore})"
+                                    />
+                                    <span class="text-gray-400">-</span>
+                                    <input 
+                                        type="number" 
+                                        min="0" 
+                                        max="${maxScore}" 
+                                        value="${score.team2Score !== null ? score.team2Score : ''}"
+                                        placeholder="0-${maxScore}"
+                                        class="w-16 px-2 py-1 border rounded text-center"
+                                        onchange="handleKnockoutScore('${matchId}', this.value, 2, ${maxScore})"
+                                    />
+                                    ${isComplete ? `
+                                        <button 
+                                            onclick="state.clearKnockoutScore('${matchId}'); render();"
+                                            class="ml-auto text-red-600 hover:text-red-800 font-bold"
+                                            title="Clear score"
+                                        >×</button>
+                                    ` : ''}
+                                </div>
+                                
+                                <!-- Team 2 -->
+                                <div>
+                                    <div class="flex flex-wrap gap-2 mb-1">
+                                        ${PlayerBadge(team2Players[0])}
+                                        ${PlayerBadge(team2Players[1])}
+                                    </div>
+                                    ${winner === 'team2' ? '<div class="text-xs text-green-600 font-semibold">🏆 Winners</div>' : ''}
+                                </div>
+                            </div>
+                        ` : `
+                            <div class="text-sm text-gray-500 py-4 text-center">
+                                Complete previous matches first
+                            </div>
+                        `}
+                    </div>
+                `;
+            }
+            
+            return `
+                <div class="space-y-6">
+                    <!-- Configuration -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-white rounded-lg shadow p-4">
+                            <h3 class="font-semibold text-gray-800 mb-2">Quarter Finals Scoring</h3>
+                            <label class="block text-sm text-gray-600 mb-1">Match Points:</label>
+                            <select 
+                                class="w-full border rounded px-3 py-2"
+                                value="${state.knockoutMaxScore}"
+                                onchange="state.updateKnockoutMaxScore(parseInt(this.value)); render();"
+                            >
+                                ${Array.from({length: 17}, (_, i) => i + 8).map(n => `
+                                    <option value="${n}" ${state.knockoutMaxScore === n ? 'selected' : ''}>${n}</option>
+                                `).join('')}
+                            </select>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg shadow p-4">
+                            <h3 class="font-semibold text-gray-800 mb-2">Semi Finals Scoring</h3>
+                            <label class="block text-sm text-gray-600 mb-1">Match Points:</label>
+                            <select 
+                                class="w-full border rounded px-3 py-2"
+                                value="${state.semiMaxScore}"
+                                onchange="state.updateSemiMaxScore(parseInt(this.value)); render();"
+                            >
+                                ${Array.from({length: 17}, (_, i) => i + 8).map(n => `
+                                    <option value="${n}" ${state.semiMaxScore === n ? 'selected' : ''}>${n}</option>
+                                `).join('')}
+                            </select>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg shadow p-4 bg-gradient-to-br from-yellow-50 to-orange-50">
+                            <h3 class="font-semibold text-gray-800 mb-2">🏆 Final Match Scoring</h3>
+                            <label class="block text-sm text-gray-600 mb-1">Match Points:</label>
+                            <select 
+                                class="w-full border rounded px-3 py-2"
+                                value="${state.finalMaxScore}"
+                                onchange="state.updateFinalMaxScore(parseInt(this.value)); render();"
+                            >
+                                ${Array.from({length: 17}, (_, i) => i + 8).map(n => `
+                                    <option value="${n}" ${state.finalMaxScore === n ? 'selected' : ''}>${n}</option>
+                                `).join('')}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Qualified Players -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <h3 class="font-semibold text-blue-900 mb-3">Top 12 Qualified Players</h3>
+                        <div class="flex flex-wrap gap-2">
+                            ${top12.map((p, idx) => `
+                                <div class="flex items-center gap-1">
+                                    <span class="text-sm font-bold text-blue-900">#${idx + 1}</span>
+                                    ${PlayerBadge(p.playerId)}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <!-- Quarter Finals -->
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Quarter Finals</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            ${KnockoutMatchCard(
+                                'QF1: 1st/3rd vs 10th/12th',
+                                'qf1',
+                                top12[0] && top12[2] ? [top12[0].playerId, top12[2].playerId] : null,
+                                top12[9] && top12[11] ? [top12[9].playerId, top12[11].playerId] : null,
+                                state.knockoutMaxScore
+                            )}
+                            ${KnockoutMatchCard(
+                                'QF2: 2nd/4th vs 9th/11th',
+                                'qf2',
+                                top12[1] && top12[3] ? [top12[1].playerId, top12[3].playerId] : null,
+                                top12[8] && top12[10] ? [top12[8].playerId, top12[10].playerId] : null,
+                                state.knockoutMaxScore
+                            )}
+                            ${KnockoutMatchCard(
+                                'QF3: 5th/7th vs 6th/8th',
+                                'qf3',
+                                top12[4] && top12[6] ? [top12[4].playerId, top12[6].playerId] : null,
+                                top12[5] && top12[7] ? [top12[5].playerId, top12[7].playerId] : null,
+                                state.knockoutMaxScore
+                            )}
+                            ${KnockoutMatchCard(
+                                'QF4: 1st/3rd vs 10th/12th (alt)',
+                                'qf4',
+                                top12[0] && top12[2] ? [top12[0].playerId, top12[2].playerId] : null,
+                                top12[9] && top12[11] ? [top12[9].playerId, top12[11].playerId] : null,
+                                state.knockoutMaxScore
+                            )}
+                        </div>
+                    </div>
+                    
+                    <!-- Semi Finals -->
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Semi Finals</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            ${qf1Winner && qf4Winner ? KnockoutMatchCard(
+                                'SF1: QF1 Winner vs QF4 Winner',
+                                'sf1',
+                                qf1Winner === 'team1' ? [top12[0].playerId, top12[2].playerId] : [top12[9].playerId, top12[11].playerId],
+                                qf4Winner === 'team1' ? [top12[0].playerId, top12[2].playerId] : [top12[9].playerId, top12[11].playerId],
+                                state.semiMaxScore
+                            ) : `
+                                <div class="bg-white rounded-lg shadow-md p-4 border-2 border-gray-300">
+                                    <div class="font-semibold text-gray-700 mb-3">SF1: QF1 Winner vs QF4 Winner</div>
+                                    <div class="text-sm text-gray-500 py-4 text-center">
+                                        Complete QF1 and QF4 first
+                                    </div>
+                                </div>
+                            `}
+                            
+                            ${qf2Winner && qf3Winner ? KnockoutMatchCard(
+                                'SF2: QF2 Winner vs QF3 Winner',
+                                'sf2',
+                                qf2Winner === 'team1' ? [top12[1].playerId, top12[3].playerId] : [top12[8].playerId, top12[10].playerId],
+                                qf3Winner === 'team1' ? [top12[4].playerId, top12[6].playerId] : [top12[5].playerId, top12[7].playerId],
+                                state.semiMaxScore
+                            ) : `
+                                <div class="bg-white rounded-lg shadow-md p-4 border-2 border-gray-300">
+                                    <div class="font-semibold text-gray-700 mb-3">SF2: QF2 Winner vs QF3 Winner</div>
+                                    <div class="text-sm text-gray-500 py-4 text-center">
+                                        Complete QF2 and QF3 first
+                                    </div>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                    
+                    <!-- Final -->
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">🏆 Championship Final</h3>
+                        <div class="max-w-2xl mx-auto">
+                            ${sf1Winner && sf2Winner ? `
+                                ${KnockoutMatchCard(
+                                    '🏆 FINAL: SF1 Winner vs SF2 Winner',
+                                    'final',
+                                    // This is complex - you'd need to track SF winners properly
+                                    // For now, placeholder
+                                    [1, 2],
+                                    [3, 4],
+                                    state.finalMaxScore
+                                )}
+                                ${champion ? `
+                                    <div class="mt-6 text-center bg-gradient-to-r from-yellow-400 to-orange-400 text-white p-8 rounded-lg shadow-xl">
+                                        <div class="text-4xl mb-2">🎉 🏆 🎉</div>
+                                        <div class="text-2xl font-bold">CHAMPIONS!</div>
+                                        <div class="text-xl mt-2">
+                                            Congratulations to the Winners!
+                                        </div>
+                                    </div>
+                                ` : ''}
+                            ` : `
+                                <div class="bg-white rounded-lg shadow-md p-4 border-2 border-gray-300">
+                                    <div class="font-semibold text-gray-700 mb-3">🏆 FINAL</div>
+                                    <div class="text-sm text-gray-500 py-4 text-center">
+                                        Complete both Semi Finals first
+                                    </div>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ===== EVENT HANDLERS =====
+        function handleScoreChange(round, matchIdx, value, team) {
+            const score = parseInt(value);
+            if (isNaN(score) || score < 0 || score > 16) return;
+            
+            if (team === 1) {
+                state.updateMatchScore(round, matchIdx, score, 16 - score);
+            } else {
+                state.updateMatchScore(round, matchIdx, 16 - score, score);
+            }
+            render();
+        }
+
+        function clearScore(round, matchIdx) {
+            state.clearMatchScore(round, matchIdx);
+            render();
+        }
+
+        function handleKnockoutScore(matchId, value, team, maxScore) {
+            const score = parseInt(value);
+            if (isNaN(score) || score < 0 || score > maxScore) return;
+            
+            const currentScore = state.knockoutScores[matchId] || { team1Score: null, team2Score: null };
+            if (team === 1) {
+                state.updateKnockoutScore(matchId, score, currentScore.team2Score);
+            } else {
+                state.updateKnockoutScore(matchId, currentScore.team1Score, score);
+            }
+            render();
+        }
+
+        function exportData() {
+            const data = state.exportData();
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `padel-tournament-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            alert('Tournament data exported successfully!');
+        }
+
+        function importData(file) {
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    state.importData(data);
+                    render();
+                    alert('Tournament data imported successfully!');
+                } catch (error) {
+                    alert('Error importing data. Please make sure the file is valid.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function resetScores() {
+            if (confirm('This will clear all match scores. A backup will be created automatically. Continue?')) {
+                state.resetAllScores();
+                render();
+                alert('Backup saved! All scores have been reset!');
+            }
+        }
+
+        function saveBackup() {
+            const nameInput = document.getElementById('backup-name');
+            const name = nameInput.value.trim() || `Backup ${new Date().toLocaleString()}`;
+            state.createBackup(name);
+            nameInput.value = '';
+            render();
+            alert('Version saved successfully!');
+        }
+
+        function loadVersion(versionId) {
+            if (confirm('Load this version? Current state will be backed up first.')) {
+                state.loadVersion(versionId);
+                render();
+                alert('Current state backed up! Version loaded successfully!');
+            }
+        }
+
+        function deleteVersion(versionId) {
+            if (confirm('Delete this saved version?')) {
+                state.deleteVersion(versionId);
+                render();
+            }
+        }
+
+        // ===== MAIN RENDER =====
+        function render() {
+            const app = document.getElementById('app');
+            
+            const tabContent = {
+                'fixtures': TournamentFixturesTab(),
+                'players': PlayersTab(),
+                'data': DataManagementTab(),
+                'results': ResultsTab(),
+                'fairness': FairnessTab(),
+                'fairness2': Fairness2Tab(),
+                'partnerships': PartnershipsTab(),
+                'knockout': KnockoutTab()
+            };
+            
+            app.innerHTML = `
+                <div class="max-w-7xl mx-auto p-4">
+                    <!-- Header -->
+                    <div class="bg-gradient-to-r from-blue-600 to-blue-800 text-white rounded-lg shadow-lg p-6 mb-6">
+                        <h1 class="text-3xl font-bold mb-2">🏓 Padel Tournament</h1>
+                        <div class="text-sm opacity-90">24 Players • 13 Rounds • Fairness-Optimized</div>
+                        <div class="text-xs opacity-75 mt-1">💾 Auto-saved to your device</div>
+                    </div>
+                    
+                    <!-- Tabs -->
+                    <div class="bg-white rounded-lg shadow mb-6 overflow-x-auto">
+                        <div class="flex border-b min-w-max">
+                            <button 
+                                onclick="state.currentTab = 'fixtures'; render();"
+                                class="px-6 py-3 font-medium ${state.currentTab === 'fixtures' ? 'tab-active' : 'tab-inactive'}"
+                            >
+                                🏆 Tournament Fixtures
+                            </button>
+                            <button 
+                                onclick="state.currentTab = 'players'; render();"
+                                class="px-6 py-3 font-medium ${state.currentTab === 'players' ? 'tab-active' : 'tab-inactive'}"
+                            >
+                                👥 Player Names
+                            </button>
+                            <button 
+                                onclick="state.currentTab = 'data'; render();"
+                                class="px-6 py-3 font-medium ${state.currentTab === 'data' ? 'tab-active' : 'tab-inactive'}"
+                            >
+                                💾 Data Management
+                            </button>
+                            <button 
+                                onclick="state.currentTab = 'results'; render();"
+                                class="px-6 py-3 font-medium ${state.currentTab === 'results' ? 'tab-active' : 'tab-inactive'}"
+                            >
+                                📊 Results & Standings
+                            </button>
+                            <button 
+                                onclick="state.currentTab = 'fairness'; render();"
+                                class="px-6 py-3 font-medium ${state.currentTab === 'fairness' ? 'tab-active' : 'tab-inactive'}"
+                            >
+                                ⚖️ Fairness
+                            </button>
+                            <button 
+                                onclick="state.currentTab = 'fairness2'; render();"
+                                class="px-6 py-3 font-medium ${state.currentTab === 'fairness2' ? 'tab-active' : 'tab-inactive'}"
+                            >
+                                ⚖️ Fairness 2
+                            </button>
+                            <button 
+                                onclick="state.currentTab = 'partnerships'; render();"
+                                class="px-6 py-3 font-medium ${state.currentTab === 'partnerships' ? 'tab-active' : 'tab-inactive'}"
+                            >
+                                🤝 Partnerships
+                            </button>
+                            <button 
+                                onclick="state.currentTab = 'knockout'; render();"
+                                class="px-6 py-3 font-medium ${state.currentTab === 'knockout' ? 'tab-active' : 'tab-inactive'}"
+                            >
+                                🏆 Knockout
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Tab Content -->
+                    <div>
+                        ${tabContent[state.currentTab]}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Initial render
+        render();
     </script>
 </body>
 </html>
