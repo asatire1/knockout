@@ -68,15 +68,15 @@
         }
         
         .score-input {
-            font-size: 2rem;
+            font-size: 1.75rem;
             font-weight: 600;
             text-align: center;
             border: none;
             background: rgba(0, 0, 0, 0.03);
             border-radius: 16px;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            width: 80px;
-            height: 80px;
+            width: 70px;
+            height: 70px;
             color: #1F2937;
         }
         
@@ -99,16 +99,21 @@
         }
         
         .player-badge-enhanced {
-            padding: 10px 16px;
+            padding: 8px 14px;
             border-radius: 100px;
-            font-size: 0.875rem;
+            font-size: 0.8125rem;
             font-weight: 600;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            justify-content: center;
+            gap: 6px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             border: 1px solid rgba(255, 255, 255, 0.2);
+            min-width: 140px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
         .player-badge-enhanced:hover {
@@ -156,8 +161,8 @@
             color: #DC2626;
             border: none;
             border-radius: 50%;
-            width: 44px;
-            height: 44px;
+            width: 38px;
+            height: 38px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -203,13 +208,19 @@
         
         @media (max-width: 640px) {
             .score-input {
-                width: 70px;
-                height: 70px;
-                font-size: 1.75rem;
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
             }
             
             .match-card {
                 border-radius: 16px;
+            }
+            
+            .player-badge-enhanced {
+                min-width: 120px;
+                font-size: 0.75rem;
+                padding: 6px 12px;
             }
         }
     </style>
@@ -595,39 +606,38 @@
             return `
                 <div class="match-card ${within ? 'match-within' : 'match-cross'} ${isComplete ? 'complete' : ''}">
                     <!-- Header -->
-                    <div class="px-6 py-4 flex justify-between items-center" style="background: rgba(0, 0, 0, 0.02);">
-                        <div class="flex items-center gap-3">
-                            <div class="font-semibold text-xl text-gray-800" style="letter-spacing: -0.5px;">R${round}</div>
+                    <div class="px-5 py-2.5 flex justify-between items-center" style="background: rgba(0, 0, 0, 0.02);">
+                        <div class="flex items-center gap-2.5">
+                            <div class="font-semibold text-lg text-gray-800" style="letter-spacing: -0.5px;">R${round}</div>
                             <div class="w-1 h-1 rounded-full bg-gray-300"></div>
-                            <div class="text-sm text-gray-500 font-medium">Match ${matchIdx + 1}</div>
+                            <div class="text-xs text-gray-500 font-medium">M${matchIdx + 1}</div>
                         </div>
                         <div class="match-type-badge ${within ? 'bg-purple-50 text-purple-600' : 'bg-green-50 text-green-600'}">
                             ${within ? 'Within' : 'Cross'}
                         </div>
                     </div>
 
-                    <div class="p-6 space-y-5">
+                    <div class="p-4 space-y-3">
                         <!-- Team 1 -->
-                        <div class="space-y-3">
-                            <div class="flex flex-wrap gap-2.5">
+                        <div class="space-y-2">
+                            <div class="flex justify-center gap-2">
                                 ${PlayerBadge(match.team1[0])}
                                 ${PlayerBadge(match.team1[1])}
                             </div>
-                            <div class="flex items-center gap-3">
-                                <div class="px-3 py-1.5 bg-gray-50 text-gray-600 rounded-full text-xs font-semibold" style="letter-spacing: 0.3px;">
+                            <div class="flex items-center justify-center gap-2">
+                                <div class="px-2.5 py-1 bg-gray-50 text-gray-600 rounded-full text-xs font-semibold" style="letter-spacing: 0.3px;">
                                     ⚡ ${team1Rating}
                                 </div>
                                 ${winner === 'team1' ? `
-                                    <div class="flex items-center gap-1.5 text-green-600 font-semibold text-sm">
-                                        <span style="font-size: 1.125rem;">🏆</span>
-                                        <span style="letter-spacing: 0.2px;">Winners</span>
+                                    <div class="flex items-center gap-1 text-green-600 font-semibold text-xs">
+                                        <span style="font-size: 1rem;">🏆</span>
                                     </div>
                                 ` : ''}
                             </div>
                         </div>
 
                         <!-- Score Input -->
-                        <div class="flex items-center justify-center gap-4 py-2">
+                        <div class="flex items-center justify-center gap-3 py-1">
                             <input 
                                 type="number" 
                                 min="0" 
@@ -657,19 +667,18 @@
                         </div>
 
                         <!-- Team 2 -->
-                        <div class="space-y-3">
-                            <div class="flex flex-wrap gap-2.5">
+                        <div class="space-y-2">
+                            <div class="flex justify-center gap-2">
                                 ${PlayerBadge(match.team2[0])}
                                 ${PlayerBadge(match.team2[1])}
                             </div>
-                            <div class="flex items-center gap-3">
-                                <div class="px-3 py-1.5 bg-gray-50 text-gray-600 rounded-full text-xs font-semibold" style="letter-spacing: 0.3px;">
+                            <div class="flex items-center justify-center gap-2">
+                                <div class="px-2.5 py-1 bg-gray-50 text-gray-600 rounded-full text-xs font-semibold" style="letter-spacing: 0.3px;">
                                     ⚡ ${team2Rating}
                                 </div>
                                 ${winner === 'team2' ? `
-                                    <div class="flex items-center gap-1.5 text-green-600 font-semibold text-sm">
-                                        <span style="font-size: 1.125rem;">🏆</span>
-                                        <span style="letter-spacing: 0.2px;">Winners</span>
+                                    <div class="flex items-center gap-1 text-green-600 font-semibold text-xs">
+                                        <span style="font-size: 1rem;">🏆</span>
                                     </div>
                                 ` : ''}
                             </div>
@@ -677,7 +686,7 @@
 
                         <!-- Winner/Draw Banner -->
                         ${isComplete && winner === 'draw' ? `
-                            <div class="winner-banner" style="background: linear-gradient(135deg, #6B7280 0%, #4B5563 100%);">
+                            <div class="winner-banner py-2 text-sm" style="background: linear-gradient(135deg, #6B7280 0%, #4B5563 100%); margin-top: 8px;">
                                 🤝 Match Drawn
                             </div>
                         ` : ''}
