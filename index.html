@@ -206,6 +206,25 @@
             transform: scale(0.95);
         }
         
+        /* Custom scrollbar for fairness rounds */
+        .overflow-x-auto::-webkit-scrollbar {
+            height: 6px;
+        }
+        
+        .overflow-x-auto::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+        }
+        
+        .overflow-x-auto::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+        
+        .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
         @media (max-width: 640px) {
             .score-input {
                 width: 60px;
@@ -1303,13 +1322,13 @@
                                                 ${f.easiestRound > 0 ? '+' : ''}${f.easiestRound.toFixed(2)}
                                             </td>
                                             <td class="px-4 py-3">
-                                                <div class="flex flex-wrap gap-1">
+                                                <div class="flex gap-1 overflow-x-auto pb-1" style="scrollbar-width: thin; max-width: 400px;">
                                                     ${f.roundScores.map((score, idx) => {
                                                         const color = score < -0.1 ? 'bg-red-100 text-red-700' : 
                                                                      score > 0.1 ? 'bg-green-100 text-green-700' : 
                                                                      'bg-gray-100 text-gray-700';
                                                         return `
-                                                            <span class="px-2 py-1 rounded text-xs ${color}" title="Round ${idx + 1}: ${score > 0 ? '+' : ''}${score.toFixed(2)}">
+                                                            <span class="px-2 py-1 rounded text-xs whitespace-nowrap ${color}" title="Round ${idx + 1}: ${score > 0 ? '+' : ''}${score.toFixed(2)}">
                                                                 ${score > 0 ? '+' : ''}${score.toFixed(1)}
                                                             </span>
                                                         `;
@@ -1408,13 +1427,13 @@
                                                 ${f.easiestRound > 0 ? '+' : ''}${f.easiestRound.toFixed(2)}
                                             </td>
                                             <td class="px-4 py-3">
-                                                <div class="flex flex-wrap gap-1">
+                                                <div class="flex gap-1 overflow-x-auto pb-1" style="scrollbar-width: thin; max-width: 400px;">
                                                     ${f.roundScores.map((score, idx) => {
                                                         const color = score < -0.05 ? 'bg-red-100 text-red-700' : 
                                                                      score > 0.05 ? 'bg-green-100 text-green-700' : 
                                                                      'bg-gray-100 text-gray-700';
                                                         return `
-                                                            <span class="px-2 py-1 rounded text-xs ${color}" title="Round ${idx + 1}: ${score > 0 ? '+' : ''}${score.toFixed(2)}">
+                                                            <span class="px-2 py-1 rounded text-xs whitespace-nowrap ${color}" title="Round ${idx + 1}: ${score > 0 ? '+' : ''}${score.toFixed(2)}">
                                                                 ${score > 0 ? '+' : ''}${score.toFixed(1)}
                                                             </span>
                                                         `;
